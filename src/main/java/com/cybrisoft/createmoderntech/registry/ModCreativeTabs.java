@@ -54,6 +54,12 @@ public class ModCreativeTabs {
 
     private static void displayItems(CreativeModeTab.ItemDisplayParameters pParameters, CreativeModeTab.Output pOutput) {
         pOutput.accept(ModBlocks.VOLUMETRIC_DISPLAY_BLOCK);
+        pOutput.accept(ModBlocks.LENS_1X);
+        pOutput.accept(ModBlocks.LENS_2X);
+        pOutput.accept(ModBlocks.LENS_4X);
+        pOutput.accept(ModBlocks.LENS_10X);
+        pOutput.accept(ModBlocks.LENS_16X);
+        pOutput.accept(ModBlocks.LENS_EXTENSION);
     }
 
 

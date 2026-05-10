@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "createmoderntech:block/lens_10x",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "createmoderntech:block/lens_10x",
+      "x": 90
+    },
+    "facing=north": {
+      "model": "createmoderntech:block/lens_10x"
+    },
+    "facing=south": {
+      "model": "createmoderntech:block/lens_10x",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "createmoderntech:block/lens_10x",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "createmoderntech:block/lens_10x",
+      "y": 90
+    }
+  }
+}

@@ -26,7 +26,6 @@ import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import org.slf4j.Logger;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
 @Mod(CreateModernTech.MODID)
 public class CreateModernTech {
     public static final String MODID = "createmoderntech";

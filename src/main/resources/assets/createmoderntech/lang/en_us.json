@@ -1,5 +1,9 @@
 {
-  "itemGroup.createmoderntech": "Example Mod Tab",
-  "block.createmoderntech.example_block": "Example Block",
-  "item.createmoderntech.example_item": "Example Item"
+  "itemGroup.createmoderntech.modern_tech": "Create: Modern Tech",
+  "block.createmoderntech.volumetric_display": "Volumetric Display",
+  "block.createmoderntech.lens_1x": "Lens - 1X",
+  "block.createmoderntech.lens_2x": "Lens - 2X",
+  "block.createmoderntech.lens_4x": "Lens - 4X",
+  "block.createmoderntech.lens_10x": "Lens - 10X",
+  "block.createmoderntech.lens_16x": "Lens - 16X"
 }

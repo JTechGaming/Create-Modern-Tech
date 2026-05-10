@@ -1,5 +1,7 @@
 package com.cybrisoft.createmoderntech.block.volumetric.display;
 
+import com.cybrisoft.createmoderntech.block.lens.VerticalLensBlock;
+import com.cybrisoft.createmoderntech.registry.ModBlocks;
 import com.cybrisoft.createmoderntech.registry.ModPackets;
 import com.cybrisoft.createmoderntech.util.ChunkCache;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -11,7 +13,10 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.joml.Matrix4f;
 
 import java.util.List;
@@ -20,7 +25,7 @@ import java.util.concurrent.CompletableFuture;
 public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<VolumetricDisplayBlockEntity> {
     private static final int MAX_CHUNK_RADIUS = 7;
 
-    private static final float DISPLAY_HEIGHT = 1.5f;
+    private static final float DISPLAY_HEIGHT = 2.0f;
     private static final float VOXEL_SIZE = 0.01f;
     private static final float VOXEL_SHAPE_SIZE = 0.005f;
     private static final float VOXEL_ALPHA = 0.4f;
@@ -67,16 +72,78 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             blockEntity.vboDirty = true;
         }
 
+        float magnification = 1.0f;
+        int offset = 0;
+        BlockState aboveBlockState = level.getBlockState(centerPos.above());
+        int bottomMagLevel = 0;
+        if (isFacingDown(aboveBlockState)) {
+            if (aboveBlockState.is(ModBlocks.LENS_1X.get())) {
+                bottomMagLevel = 1;
+            } else if (aboveBlockState.is(ModBlocks.LENS_2X.get())) {
+                bottomMagLevel = 2;
+            } else if (aboveBlockState.is(ModBlocks.LENS_4X.get())) {
+                bottomMagLevel = 4;
+            } else if (aboveBlockState.is(ModBlocks.LENS_10X.get())) {
+                bottomMagLevel = 10;
+            } else if (aboveBlockState.is(ModBlocks.LENS_16X.get())) {
+                bottomMagLevel = 16;
+            }
+            offset++;
+        }
+        BlockPos pos = centerPos.above().above();
+        if (bottomMagLevel != 0) {
+            aboveBlockState = level.getBlockState(pos);
+
+            while (aboveBlockState.is(ModBlocks.LENS_EXTENSION)) {
+                pos = pos.above();
+                aboveBlockState = level.getBlockState(pos);
+                offset++;
+            }
+
+            aboveBlockState = level.getBlockState(pos);
+            if (isFacingUp(aboveBlockState)) {
+                int topMagLevel = 0;
+                if (aboveBlockState.is(ModBlocks.LENS_1X.get())) {
+                    topMagLevel = 1;
+                } else if (aboveBlockState.is(ModBlocks.LENS_2X.get())) {
+                    topMagLevel = 2;
+                } else if (aboveBlockState.is(ModBlocks.LENS_4X.get())) {
+                    topMagLevel = 4;
+                } else if (aboveBlockState.is(ModBlocks.LENS_10X.get())) {
+                    topMagLevel = 10;
+                } else if (aboveBlockState.is(ModBlocks.LENS_16X.get())) {
+                    topMagLevel = 16;
+                }
+
+                magnification = (float) topMagLevel / bottomMagLevel;
+                offset++;
+            }
+        }
+
         Matrix4f cameraView = new Matrix4f(RenderSystem.getModelViewMatrix());
         ms.pushPose();
-        ms.translate(0.5, DISPLAY_HEIGHT, 0.5);
-        renderVolumetricDisplay(ms, bufferSource, blockEntity, cameraView, deltaTicks, sampleCenter);
+        ms.translate(0.5, DISPLAY_HEIGHT + offset, 0.5);
+        renderVolumetricDisplay(ms, bufferSource, blockEntity, cameraView, deltaTicks, sampleCenter, magnification);
         ms.popPose();
+    }
+
+    public boolean isFacingDown(BlockState state) {
+        if (state.hasProperty(BlockStateProperties.FACING)) {
+            return state.getValue(BlockStateProperties.FACING) == Direction.DOWN;
+        }
+        return false;
+    }
+
+    public boolean isFacingUp(BlockState state) {
+        if (state.hasProperty(BlockStateProperties.FACING)) {
+            return state.getValue(BlockStateProperties.FACING) == Direction.UP;
+        }
+        return false;
     }
 
     private void renderVolumetricDisplay(PoseStack ms, MultiBufferSource bufferSource,
                                          VolumetricDisplayBlockEntity blockEntity,
-                                         Matrix4f cameraView, float deltaTicks, BlockPos sampleCenter) {
+                                         Matrix4f cameraView, float deltaTicks, BlockPos sampleCenter, float magnification) {
         // --- Speed lerp ---
         float rawSpeed = Math.abs(blockEntity.getSpeed());
         float currentTarget = (rawSpeed < 0.01f) ? 0.0f : rawSpeed;
@@ -142,9 +209,9 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                     float relY = (voxel.y - capCenter.getY());
                     float relZ = (voxel.z - capCenter.getZ());
 
-                    float posX = relX * VOXEL_SIZE * capGrowth;
-                    float posY = relY * VOXEL_SIZE * capGrowth;
-                    float posZ = relZ * VOXEL_SIZE * capGrowth;
+                    float posX = relX * VOXEL_SIZE * magnification * capGrowth;
+                    float posY = relY * VOXEL_SIZE * magnification * capGrowth;
+                    float posZ = relZ * VOXEL_SIZE * magnification * capGrowth;
 
                     float heightFactor = (voxel.y - capCenter.getY() + 32) / 64.0f;
                     float r = 0.2f + (heightFactor * 0.4f);
@@ -153,7 +220,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                     float a = VOXEL_ALPHA;
 
                     float voxelH = voxel.height * capGrowth;
-                    drawVoxelToBuilder(builder, posX, posY, posZ, voxelH, voxel, r, g, b, a);
+                    drawVoxelToBuilder(builder, posX, posY, posZ, voxelH, voxel, r, g, b, a, magnification);
                 }
 
                 blockEntity.pendingMesh = builder.buildOrThrow();
@@ -177,19 +244,19 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         // Inline scan pass — only voxels inside the scan band, submitted each frame
         VertexConsumer scanBuffer = bufferSource.getBuffer(RenderType.lightning());
         Matrix4f matrix = ms.last().pose();
-        float scaledScan = scanPos * VOXEL_SIZE * 50f;
+        float scaledScan = scanPos * VOXEL_SIZE * magnification * 50f;
 
         for (ChunkCache.VoxelData voxel : blockEntity.chunkCache.getVoxels()) {
             float relX = (voxel.x - sampleCenter.getX());
             float relY = (voxel.y - sampleCenter.getY());
             float relZ = (voxel.z - sampleCenter.getZ());
 
-            float posZ = relZ * VOXEL_SIZE * growth * pulse;
+            float posZ = relZ * VOXEL_SIZE * magnification * growth * pulse;
             float distToScan = Math.abs(posZ - scaledScan);
             if (distToScan > SCAN_BAND_WIDTH) continue;
 
-            float posX = relX * VOXEL_SIZE * growth * pulse;
-            float posY = relY * VOXEL_SIZE * growth * pulse;
+            float posX = relX * VOXEL_SIZE * magnification * growth * pulse;
+            float posY = relY * VOXEL_SIZE * magnification * growth * pulse;
 
             float scanHighlight = Math.max(0, 1.0f - (distToScan / SCAN_BAND_WIDTH));
             float heightFactor = (voxel.y - sampleCenter.getY() + 32) / 64.0f;
@@ -200,7 +267,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             float a = VOXEL_ALPHA + (scanHighlight * 0.5f);
 
             float voxelH = voxel.height * growth;
-            drawVoxelToConsumer(matrix, scanBuffer, posX, posY, posZ, voxelH, voxel, r, g, b, a);
+            drawVoxelToConsumer(matrix, scanBuffer, posX, posY, posZ, voxelH, voxel, r, g, b, a, magnification);
         }
     }
 
@@ -211,9 +278,9 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
     private void drawVoxelToConsumer(Matrix4f matrix, VertexConsumer buf,
                                      float x, float y, float z, float h,
                                      ChunkCache.VoxelData voxel,
-                                     float r, float g, float b, float a) {
-        float s = VOXEL_SHAPE_SIZE;
-        float d = h * VOXEL_SIZE;
+                                     float r, float g, float b, float a, float magnification) {
+        float s = VOXEL_SHAPE_SIZE * magnification;
+        float d = h * VOXEL_SIZE * magnification;
         quadC(matrix, buf, x-s,y,z-s, x-s,y,z+s, x+s,y,z+s, x+s,y,z-s, r,g,b,a);
         if (h <= 1) return;
         if (voxel.exposedWest)  quadC(matrix,buf, x-s,y,z+s, x-s,y-d,z+s, x-s,y-d,z-s, x-s,y,z-s, r,g,b,a);
@@ -225,9 +292,9 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
     private void drawVoxelToBuilder(BufferBuilder buf,
                                     float x, float y, float z, float h,
                                     ChunkCache.VoxelData voxel,
-                                    float r, float g, float b, float a) {
-        float s = VOXEL_SHAPE_SIZE;
-        float d = h * VOXEL_SIZE;
+                                    float r, float g, float b, float a, float magnification) {
+        float s = VOXEL_SHAPE_SIZE * magnification;
+        float d = h * VOXEL_SIZE * magnification;
         quadB(buf, x-s,y,z-s, x-s,y,z+s, x+s,y,z+s, x+s,y,z-s, r,g,b,a);
         if (h <= 1) return;
         if (voxel.exposedWest)  quadB(buf, x-s,y,z+s, x-s,y-d,z+s, x-s,y-d,z-s, x-s,y,z-s, r,g,b,a);

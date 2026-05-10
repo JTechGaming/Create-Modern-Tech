@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "createmoderntech:block/volumetric_display"
+    }
+  }
+}
