@@ -15,9 +15,6 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class VolumetricShaftBlock extends KineticBlock implements IBE<VolumetricShaftBlockEntity> {
-
-    private static final VoxelShape SHAPE = box(6, 0, 6, 10, 16, 10);
-
     public VolumetricShaftBlock(Properties properties) {
         super(properties);
     }
@@ -30,11 +27,6 @@ public class VolumetricShaftBlock extends KineticBlock implements IBE<Volumetric
     @Override
     public boolean hasShaftTowards(LevelReader world, BlockPos pos, BlockState state, Direction face) {
         return face.getAxis() == Direction.Axis.Y;
-    }
-
-    @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
-        return SHAPE;
     }
 
     @Override

@@ -13,6 +13,7 @@ import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
@@ -38,6 +39,20 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
     private static final float SCAN_BAND_WIDTH = 0.02f;
 
     private static final int LERP_SPEED = 10;
+
+    private static final RenderType HOLOGRAM_RENDER_TYPE = RenderType.create(
+            "hologram",
+            DefaultVertexFormat.POSITION_COLOR,
+            VertexFormat.Mode.QUADS,
+            256,
+            false, true,
+            RenderType.CompositeState.builder()
+                    .setShaderState(new RenderStateShard.ShaderStateShard(GameRenderer::getPositionColorShader))
+                    .setTransparencyState(RenderStateShard.TRANSLUCENT_TRANSPARENCY)
+                    .setWriteMaskState(RenderStateShard.COLOR_DEPTH_WRITE)
+                    .setDepthTestState(RenderStateShard.LEQUAL_DEPTH_TEST)
+                    .createCompositeState(false)
+    );
 
     public VolumetricDisplayRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
@@ -99,7 +114,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             offset++;
         }
         BlockPos lensPos = rawPos.above().above();
-        float[] color = {0.2f, 0.5f, 1.0f, 1.0f};
+        float[] color = {0.5f, 0.7f, 0.8f, 1.0f};
         if (bottomMagLevel != 0) {
             aboveBlockState = level.getBlockState(lensPos);
             while (isLensExtension(aboveBlockState)) {
@@ -152,33 +167,23 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                 || aboveBlockState.is(ModBlocks.LIGHT_BOOST_FILTER);
     }
 
-    private static final float[][] FILTER_COLORS = {
-            {0.3f, 1.0f, 0.3f, 1.0f}, // lime
-            {0.7f, 0.2f, 1.0f, 1.0f}, // purple
-            {1.0f, 0.2f, 0.2f, 1.0f}, // red
-            {10.0f, 10.0f, 10.0f, 1.0f}  // white
-    };
-
     private float[] blendColor(BlockState state, float[] color) {
-        float[] tint = null;
+        float[] target = null;
+        float strength = 0.4f;
 
-        if (state.is(ModBlocks.LIME_COLOR_FILTER)) {
-            tint = FILTER_COLORS[0];
-        } else if (state.is(ModBlocks.PURPLE_COLOR_FILTER)) {
-            tint = FILTER_COLORS[1];
-        } else if (state.is(ModBlocks.RED_COLOR_FILTER)) {
-            tint = FILTER_COLORS[2];
-        } else if (state.is(ModBlocks.WHITE_COLOR_FILTER)) {
-            tint = FILTER_COLORS[3];
-        }
+        if (state.is(ModBlocks.LIME_COLOR_FILTER))   target = new float[]{0.2f, 1.0f, 0.2f};
+        else if (state.is(ModBlocks.PURPLE_COLOR_FILTER)) target = new float[]{0.6f, 0.0f, 1.0f};
+        else if (state.is(ModBlocks.RED_COLOR_FILTER))    target = new float[]{1.0f, 0.0f, 0.0f};
+        else if (state.is(ModBlocks.WHITE_COLOR_FILTER))  target = new float[]{1.0f, 1.0f, 1.0f};
 
-        if (tint == null) return color;
+        if (target == null) return color;
 
+        // Lerp toward the target color by strength
         return new float[]{
-                color[0] * tint[0],
-                color[1] * tint[1],
-                color[2] * tint[2],
-                color[3] * tint[3]
+                color[0] + (target[0] - color[0]) * strength,
+                color[1] + (target[1] - color[1]) * strength,
+                color[2] + (target[2] - color[2]) * strength,
+                color[3]
         };
     }
 
@@ -285,18 +290,18 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             ms.pushPose();
             ms.scale(growth * magnification * pulse, growth * magnification * pulse, growth * magnification * pulse);
 
-            RenderType.lightning().setupRenderState();
+            HOLOGRAM_RENDER_TYPE.setupRenderState();
             blockEntity.staticVBO.bind();
             Matrix4f modelView = new Matrix4f(cameraView).mul(ms.last().pose());
             blockEntity.staticVBO.drawWithShader(modelView, RenderSystem.getProjectionMatrix(),
                     GameRenderer.getPositionColorShader());
             VertexBuffer.unbind();
-            RenderType.lightning().clearRenderState();
+            HOLOGRAM_RENDER_TYPE.clearRenderState();
 
             ms.popPose();
         }
 
-        VertexConsumer scanBuffer = bufferSource.getBuffer(RenderType.lightning());
+        VertexConsumer scanBuffer = bufferSource.getBuffer(HOLOGRAM_RENDER_TYPE);
         Matrix4f matrix = ms.last().pose();
         float scale = growth * magnification * pulse;
         float scaledScan = scanPos * VOXEL_SIZE * 50f; // scan position in neutral space

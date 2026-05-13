@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "createmoderntech:block/pan_z_controller",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "createmoderntech:block/pan_z_controller",
+      "x": 90
+    },
+    "facing=north": {
+      "model": "createmoderntech:block/pan_z_controller"
+    },
+    "facing=south": {
+      "model": "createmoderntech:block/pan_z_controller",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "createmoderntech:block/pan_z_controller",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "createmoderntech:block/pan_z_controller",
+      "y": 90
+    }
+  }
+}

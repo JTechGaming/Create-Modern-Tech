@@ -9,10 +9,13 @@ import net.createmod.ponder.api.registration.PonderSceneRegistrationHelper;
 import net.minecraft.resources.ResourceLocation;
 
 public class ModPonderIndex implements PonderPlugin {
-
     public static void register(PonderSceneRegistrationHelper<ResourceLocation> helper) {
         CreateModernTech.getLogger().info("Registering Ponder!");
-        PonderSceneRegistrationHelper<ItemProviderEntry<?, ?>> HELPER = helper.withKeyFunction(RegistryEntry::getId);
+        PonderSceneRegistrationHelper<ItemProviderEntry<?, ?>> HELPER =
+                helper.withKeyFunction(RegistryEntry::getId);
+
+        HELPER.forComponents(ModBlocks.VOLUMETRIC_DISPLAY_BLOCK)
+                .addStoryBoard("volumetric_display", PonderScenes::volumetricDisplay);
     }
 
     @Override
