@@ -1,5 +1,6 @@
 package com.cybrisoft.createmoderntech;
 
+import com.cybrisoft.createmoderntech.config.ModernTechAllConfigs;
 import com.cybrisoft.createmoderntech.ponder.ModernTechPonderPlugin;
 import com.cybrisoft.createmoderntech.registry.*;
 import com.mojang.logging.LogUtils;
@@ -15,6 +16,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
+import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -49,6 +51,8 @@ public class CreateModernTech {
         ModCreativeTabs.register(modEventBus);
         ModPackets.register(modEventBus);
 
+        ModernTechAllConfigs.register(ModLoadingContext.get(), modContainer);
+
         modEventBus.addListener(CreateModernTech::init);
         modEventBus.addListener(CreateModernTech::clientInit);
         modEventBus.addListener(CreateModernTech::onLoadComplete);
@@ -56,6 +60,10 @@ public class CreateModernTech {
 
         NeoForge.EVENT_BUS.addListener(CreateModernTech::clientTick);
         NeoForge.EVENT_BUS.addListener(CreateModernTech::onLoadWorld);
+    }
+
+    public static ResourceLocation path(final String path) {
+        return ResourceLocation.tryBuild(MODID, path);
     }
 
     @SubscribeEvent

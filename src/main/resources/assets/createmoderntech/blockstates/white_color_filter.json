@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "createmoderntech:block/white_color_filter",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "createmoderntech:block/white_color_filter",
+      "x": 90
+    },
+    "facing=north": {
+      "model": "createmoderntech:block/white_color_filter"
+    },
+    "facing=south": {
+      "model": "createmoderntech:block/white_color_filter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "createmoderntech:block/white_color_filter",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "createmoderntech:block/white_color_filter",
+      "y": 90
+    }
+  }
+}

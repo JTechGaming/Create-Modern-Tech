@@ -5,5 +5,16 @@
   "block.createmoderntech.lens_2x": "Lens - 2X",
   "block.createmoderntech.lens_4x": "Lens - 4X",
   "block.createmoderntech.lens_10x": "Lens - 10X",
-  "block.createmoderntech.lens_16x": "Lens - 16X"
+  "block.createmoderntech.lens_16x": "Lens - 16X",
+  "block.createmoderntech.lens_extension": "Lens Extension",
+  "block.createmoderntech.telephoto_extension": "Telephoto Extension",
+  "block.createmoderntech.lime_color_filter": "Lime Color Filter",
+  "block.createmoderntech.purple_color_filter": "Purple Color Filter",
+  "block.createmoderntech.red_color_filter": "Red Color Filter",
+  "block.createmoderntech.white_color_filter": "White Color Filter",
+  "block.createmoderntech.volumetric_shaft": "Volumetric Shaft",
+  "block.createmoderntech.pan_x_controller": "Volume Pan Controller - X",
+  "block.createmoderntech.pan_z_controller": "Volume Pan Controller - Z",
+  "block.createmoderntech.pitch_controller": "Volume Pitch Controller",
+  "block.createmoderntech.yaw_controller": "Volume Yaw Controller"
 }

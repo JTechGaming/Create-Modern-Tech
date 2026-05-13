@@ -54,12 +54,24 @@ public class ModCreativeTabs {
 
     private static void displayItems(CreativeModeTab.ItemDisplayParameters pParameters, CreativeModeTab.Output pOutput) {
         pOutput.accept(ModBlocks.VOLUMETRIC_DISPLAY_BLOCK);
+        pOutput.accept(ModBlocks.VOLUMETRIC_SHAFT_BLOCK);
+        pOutput.accept(ModBlocks.YAW_CONTROLLER_BLOCK);
+        pOutput.accept(ModBlocks.PITCH_CONTROLLER_BLOCK);
+        pOutput.accept(ModBlocks.PAN_X_CONTROLLER_BLOCK);
+        pOutput.accept(ModBlocks.PAN_Z_CONTROLLER_BLOCK);
+
         pOutput.accept(ModBlocks.LENS_1X);
         pOutput.accept(ModBlocks.LENS_2X);
         pOutput.accept(ModBlocks.LENS_4X);
         pOutput.accept(ModBlocks.LENS_10X);
         pOutput.accept(ModBlocks.LENS_16X);
         pOutput.accept(ModBlocks.LENS_EXTENSION);
+        pOutput.accept(ModBlocks.TELEPHOTO_EXTENSION);
+        pOutput.accept(ModBlocks.LIGHT_BOOST_FILTER);
+        pOutput.accept(ModBlocks.LIME_COLOR_FILTER);
+        pOutput.accept(ModBlocks.PURPLE_COLOR_FILTER);
+        pOutput.accept(ModBlocks.RED_COLOR_FILTER);
+        pOutput.accept(ModBlocks.WHITE_COLOR_FILTER);
     }
 
 
