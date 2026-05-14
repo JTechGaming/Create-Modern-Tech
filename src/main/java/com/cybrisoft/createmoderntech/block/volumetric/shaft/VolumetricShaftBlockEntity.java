@@ -9,14 +9,19 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class VolumetricShaftBlockEntity extends KineticBlockEntity {
     public float panX = 0f;
     public float panZ = 0f;
     public float yaw = 0f;
     public float pitch = 0f;
 
-    private BlockPos cachedDisplayPos = null;
+    public BlockPos cachedDisplayPos = null;
     private boolean layoutDirty = true;
+
+    public final List<VolumetricDisplayBlockEntity.BeaconData> beacons = new ArrayList<>();
 
     public VolumetricShaftBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);

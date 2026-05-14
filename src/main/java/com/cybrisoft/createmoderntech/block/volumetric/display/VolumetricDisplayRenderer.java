@@ -22,23 +22,26 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.fml.common.Mod;
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<VolumetricDisplayBlockEntity> {
-    private static final int MAX_CHUNK_RADIUS = 7;
+    // Maximum chunk radius (16 = 32 chunk diameter)
+    private static final int MAX_CHUNK_RADIUS = 16;
+    // RPM per chunk radius unit — 256 RPM / 16 chunks = 16 RPM per chunk
+    private static final float RPM_PER_CHUNK = 16f;
+    // Lerp duration in ticks for radius expansion
+    private static final int RADIUS_LERP_SPEED = 40;
 
     private static final float DISPLAY_HEIGHT = 2.0f;
     private static final float VOXEL_SIZE = 0.01f;
     private static final float VOXEL_SHAPE_SIZE = 0.005f;
     private static final float VOXEL_ALPHA = 0.5f;
     private static final float SCAN_BAND_WIDTH = 0.02f;
-
-    private static final int LERP_SPEED = 10;
 
     private static final RenderType HOLOGRAM_RENDER_TYPE = RenderType.create(
             "hologram",
@@ -83,24 +86,69 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         } else {
             projectedPos = Vec3.atCenterOf(rawPos);
         }
+
+        float panLerpSpeed = 0.1f;
+
+        if (blockEntity.smoothPanX == 0 && blockEntity.smoothPanZ == 0
+                && (blockEntity.panX != 0 || blockEntity.panZ != 0)) {
+            blockEntity.smoothPanX = blockEntity.panX;
+            blockEntity.smoothPanZ = blockEntity.panZ;
+        }
+
+        blockEntity.smoothPanX += (blockEntity.panX - blockEntity.smoothPanX) * panLerpSpeed;
+        blockEntity.smoothPanZ += (blockEntity.panZ - blockEntity.smoothPanZ) * panLerpSpeed;
+
         BlockPos centerPos = BlockPos.containing(projectedPos);
-        BlockPos sampleCenter = centerPos.offset((int) blockEntity.panX, 0, (int) blockEntity.panZ);
+        BlockPos sampleCenter = centerPos.offset((int) blockEntity.smoothPanX, 0, (int) blockEntity.smoothPanZ);
+
+        float renderCenterX = centerPos.getX() + blockEntity.smoothPanX;
+        float renderCenterZ = centerPos.getZ() + blockEntity.smoothPanZ;
 
         Level worldLevel = Minecraft.getInstance().level;
         if (worldLevel == null) return;
 
+        // --- Radius lerp ---
+        float rawSpeed = Math.abs(blockEntity.getSpeed());
+        float targetRadius = Math.min(rawSpeed / RPM_PER_CHUNK, MAX_CHUNK_RADIUS);
+
+        if (blockEntity.targetRadius != targetRadius) {
+            blockEntity.startRadius = blockEntity.currentRadius;
+            blockEntity.targetRadius = targetRadius;
+            blockEntity.radiusLerp = 0f;
+        }
+
+        if (blockEntity.radiusLerp < 1f) {
+            blockEntity.radiusLerp += deltaTicks / RADIUS_LERP_SPEED;
+            if (blockEntity.radiusLerp > 1f) blockEntity.radiusLerp = 1f;
+            blockEntity.currentRadius = blockEntity.startRadius +
+                    (blockEntity.targetRadius - blockEntity.startRadius) * easeOutQuart(blockEntity.radiusLerp);
+        }
+
+        // Invisible at 0 radius
+        if (blockEntity.currentRadius < 0.01f) return;
+
+        // ceil for sampling (stay one step ahead), smooth for rendering
+        int sampleRadius = (int) Math.ceil(blockEntity.currentRadius);
+        sampleRadius = Math.max(1, Math.min(sampleRadius, MAX_CHUNK_RADIUS));
+
+        // Request missing chunks using ceil radius
         if (blockEntity.chunkRequestDirty) {
-            ModPackets.requestMissingChunks(blockEntity, sampleCenter, MAX_CHUNK_RADIUS);
+            ModPackets.requestMissingChunks(blockEntity, sampleCenter, sampleRadius);
             blockEntity.chunkRequestDirty = false;
         }
 
-        if (blockEntity.lastCenterPos == null || blockEntity.lastCenterPos.distSqr(sampleCenter) > 64) {
-            blockEntity.chunkCache.update(worldLevel, sampleCenter, MAX_CHUNK_RADIUS, blockEntity.heightmapCache);
+        // Cache update triggers when ceil radius changes or center moves
+        if (blockEntity.lastIntRadius != sampleRadius ||
+                blockEntity.lastCenterPos == null ||
+                blockEntity.lastCenterPos.distSqr(sampleCenter) > 64) {
+            blockEntity.chunkCache.update(worldLevel, sampleCenter, sampleRadius, blockEntity.heightmapCache);
             blockEntity.lastCacheUpdate = currentTime;
-            blockEntity.lastCenterPos = sampleCenter;
+            blockEntity.pendingIntCenter = sampleCenter;
+            blockEntity.lastIntRadius = sampleRadius;
             blockEntity.vboDirty = true;
         }
 
+        // --- Lens config ---
         float magnification = 1.0f;
         float offset = 0;
         BlockState aboveBlockState = level.getBlockState(rawPos.above());
@@ -121,12 +169,8 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                 color = blendColor(aboveBlockState, color);
                 lensPos = lensPos.above();
                 aboveBlockState = level.getBlockState(lensPos);
-                if (aboveBlockState.is(ModBlocks.TELEPHOTO_EXTENSION)) {
-                    offset += 0.5f;
-                }
-                if (aboveBlockState.is(ModBlocks.LIGHT_BOOST_FILTER)) {
-                    color[3] *= 1.2f;
-                }
+                if (aboveBlockState.is(ModBlocks.TELEPHOTO_EXTENSION)) offset += 0.5f;
+                if (aboveBlockState.is(ModBlocks.LIGHT_BOOST_FILTER)) color[3] *= 1.2f;
                 offset++;
             }
             aboveBlockState = level.getBlockState(lensPos);
@@ -156,29 +200,29 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         ms.translate(0.5, DISPLAY_HEIGHT + offset, 0.5);
         ms.mulPose(Axis.YP.rotationDegrees(blockEntity.yaw));
         ms.mulPose(Axis.XP.rotationDegrees(blockEntity.pitch));
-        renderVolumetricDisplay(ms, bufferSource, blockEntity, cameraView, deltaTicks, sampleCenter, magnification, color);
+        renderVolumetricDisplay(ms, bufferSource, blockEntity, cameraView, deltaTicks,
+                new Vector3f(renderCenterX, sampleCenter.getY(), renderCenterZ), magnification, color);
         ms.popPose();
     }
 
-    private boolean isLensExtension(BlockState aboveBlockState) {
-        return aboveBlockState.is(ModBlocks.LENS_EXTENSION) || aboveBlockState.is(ModBlocks.TELEPHOTO_EXTENSION)
-                || aboveBlockState.is(ModBlocks.LIME_COLOR_FILTER) || aboveBlockState.is(ModBlocks.PURPLE_COLOR_FILTER)
-                || aboveBlockState.is(ModBlocks.RED_COLOR_FILTER) || aboveBlockState.is(ModBlocks.WHITE_COLOR_FILTER)
-                || aboveBlockState.is(ModBlocks.LIGHT_BOOST_FILTER);
+    private boolean isLensExtension(BlockState state) {
+        return state.is(ModBlocks.LENS_EXTENSION) || state.is(ModBlocks.TELEPHOTO_EXTENSION)
+                || state.is(ModBlocks.LIME_COLOR_FILTER) || state.is(ModBlocks.PURPLE_COLOR_FILTER)
+                || state.is(ModBlocks.RED_COLOR_FILTER) || state.is(ModBlocks.WHITE_COLOR_FILTER)
+                || state.is(ModBlocks.LIGHT_BOOST_FILTER);
     }
 
     private float[] blendColor(BlockState state, float[] color) {
         float[] target = null;
         float strength = 0.4f;
 
-        if (state.is(ModBlocks.LIME_COLOR_FILTER))   target = new float[]{0.2f, 1.0f, 0.2f};
+        if (state.is(ModBlocks.LIME_COLOR_FILTER))        target = new float[]{0.2f, 1.0f, 0.2f};
         else if (state.is(ModBlocks.PURPLE_COLOR_FILTER)) target = new float[]{0.6f, 0.0f, 1.0f};
         else if (state.is(ModBlocks.RED_COLOR_FILTER))    target = new float[]{1.0f, 0.0f, 0.0f};
         else if (state.is(ModBlocks.WHITE_COLOR_FILTER))  target = new float[]{1.0f, 1.0f, 1.0f};
 
         if (target == null) return color;
 
-        // Lerp toward the target color by strength
         return new float[]{
                 color[0] + (target[0] - color[0]) * strength,
                 color[1] + (target[1] - color[1]) * strength,
@@ -200,31 +244,12 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
     private void renderVolumetricDisplay(PoseStack ms, MultiBufferSource bufferSource,
                                          VolumetricDisplayBlockEntity blockEntity,
                                          Matrix4f cameraView, float deltaTicks,
-                                         BlockPos sampleCenter, float magnification, float[] color) {
-        // --- Speed lerp ---
-        float rawSpeed = Math.abs(blockEntity.getSpeed());
-        float currentTarget = (rawSpeed < 0.01f) ? 0.0f : rawSpeed;
-
-        if (blockEntity.targetSpeed != currentTarget) {
-            blockEntity.targetSpeed = currentTarget;
-            blockEntity.startSpeed = blockEntity.speed;
-            blockEntity.lerp = 0f;
-        }
-
-        if (blockEntity.lerp < 1f) {
-            blockEntity.lerp += deltaTicks / LERP_SPEED;
-            if (blockEntity.lerp > 1f) blockEntity.lerp = 1f;
-            blockEntity.speed = blockEntity.startSpeed + (blockEntity.targetSpeed - blockEntity.startSpeed) * easeOutQuart(blockEntity.lerp);
-        }
-
-        if (blockEntity.speed < 0.001f && blockEntity.targetSpeed == 0.0f) return;
-
-        float growth = Math.min(blockEntity.speed / 256f, 1.0f);
+                                         Vector3f sampleCenter, float magnification, float[] color) {
         float time = blockEntity.getLevel().getGameTime() + AnimationTickHolder.getPartialTicks();
         float pulse = 1.0f + ((float) Math.sin(time * 0.02f) * 0.02f);
 
-        float scanSpeed = (blockEntity.speed / 256f) * 0.1f;
-        float scanPos = (time * scanSpeed) % 10.0f - 5.0f;
+        float scanSpeed = (blockEntity.currentRadius / MAX_CHUNK_RADIUS) * 0.1f;
+        float scanPos = (time * scanSpeed) % 10.0f;
 
         // Upload finished async build if ready
         if (blockEntity.rebuildFuture != null && blockEntity.rebuildFuture.isDone()) {
@@ -235,6 +260,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                 blockEntity.staticVBO.upload(blockEntity.pendingMesh);
                 VertexBuffer.unbind();
                 blockEntity.pendingMesh = null;
+                blockEntity.lastCenterPos = blockEntity.pendingIntCenter;
             }
             if (blockEntity.pendingVoxels != null) {
                 blockEntity.chunkCache.swapVoxels(blockEntity.pendingVoxels);
@@ -248,7 +274,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             blockEntity.vboDirty = false;
 
             List<ChunkCache.VoxelData> snapshot = blockEntity.chunkCache.snapshotVoxels();
-            BlockPos capCenter = sampleCenter;
+            BlockPos capIntCenter = blockEntity.pendingIntCenter;
             float[] capColor = color;
 
             if (blockEntity.pendingMesh != null) {
@@ -258,26 +284,25 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
 
             blockEntity.rebuildFuture = CompletableFuture.runAsync(() -> {
                 ByteBufferBuilder byteBuffer = new ByteBufferBuilder(snapshot.size() * 5 * 8 * 28);
-                BufferBuilder builder = new BufferBuilder(byteBuffer, VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+                BufferBuilder builder = new BufferBuilder(byteBuffer, VertexFormat.Mode.QUADS,
+                        DefaultVertexFormat.POSITION_COLOR);
 
                 for (ChunkCache.VoxelData voxel : snapshot) {
-                    float relX = (voxel.x - capCenter.getX());
-                    float relY = (voxel.y - capCenter.getY());
-                    float relZ = (voxel.z - capCenter.getZ());
+                    float relX = (voxel.x - capIntCenter.getX());
+                    float relY = (voxel.y - capIntCenter.getY());
+                    float relZ = (voxel.z - capIntCenter.getZ());
 
-                    // Bake at neutral scale — no growth, no magnification
                     float posX = relX * VOXEL_SIZE;
                     float posY = relY * VOXEL_SIZE;
                     float posZ = relZ * VOXEL_SIZE;
 
-                    float heightFactor = (voxel.y - capCenter.getY() + 32) / 64.0f;
+                    float heightFactor = (voxel.y - capIntCenter.getY() + 32) / 64.0f;
                     float r = Math.min(1.0f, (0.2f + heightFactor * 0.4f) * capColor[0]);
                     float g = Math.min(1.0f, (0.5f + heightFactor * 0.5f) * capColor[1]);
                     float b = Math.min(1.0f, capColor[2]);
                     float a = Math.min(1.0f, VOXEL_ALPHA * capColor[3]);
 
-                    float voxelH = voxel.height; // neutral height, matrix scales it
-                    drawVoxelToBuilder(builder, posX, posY, posZ, voxelH, voxel, r, g, b, a);
+                    drawVoxelToBuilder(builder, posX, posY, posZ, voxel.height, voxel, r, g, b, a);
                 }
 
                 blockEntity.pendingMesh = builder.buildOrThrow();
@@ -288,7 +313,10 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         // Draw static VBO
         if (blockEntity.staticVBO != null) {
             ms.pushPose();
-            ms.scale(growth * magnification * pulse, growth * magnification * pulse, growth * magnification * pulse);
+            float subOffsetX = (sampleCenter.x - blockEntity.lastCenterPos.getX()) * VOXEL_SIZE;
+            float subOffsetZ = (sampleCenter.z - blockEntity.lastCenterPos.getZ()) * VOXEL_SIZE;
+            ms.translate(-subOffsetX * magnification * pulse, 0, -subOffsetZ * magnification * pulse);
+            ms.scale(magnification * pulse, magnification * pulse, magnification * pulse);
 
             HOLOGRAM_RENDER_TYPE.setupRenderState();
             blockEntity.staticVBO.bind();
@@ -301,33 +329,52 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             ms.popPose();
         }
 
+        // Inline scan pass
         VertexConsumer scanBuffer = bufferSource.getBuffer(HOLOGRAM_RENDER_TYPE);
         Matrix4f matrix = ms.last().pose();
-        float scale = growth * magnification * pulse;
-        float scaledScan = scanPos * VOXEL_SIZE * 50f; // scan position in neutral space
+        float scale = magnification * pulse;
+        float scaledScan = scanPos * VOXEL_SIZE * 50f;
 
         for (ChunkCache.VoxelData voxel : blockEntity.chunkCache.getVoxels()) {
-            float relX = (voxel.x - sampleCenter.getX());
-            float relY = (voxel.y - sampleCenter.getY());
-            float relZ = (voxel.z - sampleCenter.getZ());
-
-            float posZ = relZ * VOXEL_SIZE * scale;
-            float distToScan = Math.abs(posZ - scaledScan * scale);
-            if (distToScan > SCAN_BAND_WIDTH) continue;
+            float relX = (voxel.x - sampleCenter.x());
+            float relY = (voxel.y - sampleCenter.y());
+            float relZ = (voxel.z - sampleCenter.z());
 
             float posX = relX * VOXEL_SIZE * scale;
             float posY = relY * VOXEL_SIZE * scale;
+            float posZ = relZ * VOXEL_SIZE * scale;
+            float distFromCenter = (float) Math.sqrt(posX * posX + posZ * posZ);
+            float distToScan = Math.abs(distFromCenter - scaledScan * scale);
+            if (distToScan > SCAN_BAND_WIDTH) continue;
 
             float scanHighlight = Math.max(0, 1.0f - (distToScan / SCAN_BAND_WIDTH));
-            float heightFactor = (voxel.y - sampleCenter.getY() + 32) / 64.0f;
+            float heightFactor = (voxel.y - sampleCenter.y() + 32) / 64.0f;
 
             float r = Math.min(1.0f, (0.2f + (heightFactor * 0.4f) + (scanHighlight * 0.6f)) * color[0]);
             float g = Math.min(1.0f, (0.5f + (heightFactor * 0.5f)) * color[1]);
             float b = Math.min(1.0f, color[2]);
-            float a = Math.min(1.0f, VOXEL_ALPHA + (scanHighlight * 0.5f) * color[3]);
+            float a = Math.min(1.0f, (VOXEL_ALPHA + (scanHighlight * 0.5f)) * color[3]);
 
-            float voxelH = voxel.height;
-            drawVoxelToConsumer(matrix, scanBuffer, posX, posY, posZ, voxelH, voxel, r, g, b, a, scale);
+            drawVoxelToConsumer(matrix, scanBuffer, posX, posY, posZ, voxel.height, voxel, r, g, b, a, scale);
+        }
+
+        drawCursor(ms.last().pose(), scanBuffer, scale, color, time, false);
+
+        for (VolumetricDisplayBlockEntity.BeaconData beacon : blockEntity.beacons) {
+            float relX = beacon.x - sampleCenter.x();
+            float relZ = beacon.z - sampleCenter.z();
+            float[] beaconColor = {beacon.r(), beacon.g(), beacon.b(), 1.0f};
+
+            float radiusInBlocks = blockEntity.currentRadius * 16f;
+            boolean xOutOfRange = relX > radiusInBlocks || relX < -radiusInBlocks;
+            boolean zOutOfRange = relZ > radiusInBlocks || relZ < -radiusInBlocks;
+            if (xOutOfRange) relX = Math.signum(relX) * radiusInBlocks;
+            if (zOutOfRange) relZ = Math.signum(relZ) * radiusInBlocks;
+
+            ms.pushPose();
+            ms.translate(relX * VOXEL_SIZE * scale, 0, relZ * VOXEL_SIZE * scale);
+            drawCursor(ms.last().pose(), scanBuffer, scale, beaconColor, time, xOutOfRange || zOutOfRange);
+            ms.popPose();
         }
     }
 
@@ -361,6 +408,46 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         if (voxel.exposedEast)  quadB(buf, x+s,y,z-s, x+s,y-d,z-s, x+s,y-d,z+s, x+s,y,z+s, r,g,b,a);
         if (voxel.exposedNorth) quadB(buf, x-s,y,z-s, x-s,y-d,z-s, x+s,y-d,z-s, x+s,y,z-s, r,g,b,a);
         if (voxel.exposedSouth) quadB(buf, x+s,y,z+s, x+s,y-d,z+s, x-s,y-d,z+s, x-s,y,z+s, r,g,b,a);
+    }
+
+    private void drawCursor(Matrix4f matrix, VertexConsumer buf, float scale, float[] color, float time, boolean outOfRange) {
+        float r = color[0];
+        float g = color[1];
+        float b = color[2];
+        float a = 1.0f; // cursor always fully opaque for visibility
+
+        // Pulsing size
+        float cursorRadius = 0.045f * scale * (1.0f + (float) Math.sin(time * 0.3f) * 0.15f);
+        float lineHeight = 0.26f * scale;
+        float thickness = 0.002f * scale;
+
+        // approximated circle with 16 line segments as thin quads
+        if (!outOfRange) {
+            int segments = 16;
+            for (int i = 0; i < segments; i++) {
+                float angle1 = (float) (i * 2 * Math.PI / segments);
+                float angle2 = (float) ((i + 1) * 2 * Math.PI / segments);
+                float x1 = (float) Math.cos(angle1) * cursorRadius;
+                float z1 = (float) Math.sin(angle1) * cursorRadius;
+                float x2 = (float) Math.cos(angle2) * cursorRadius;
+                float z2 = (float) Math.sin(angle2) * cursorRadius;
+                // draw thin quad between arc points
+                quadC(matrix, buf,
+                        x1 - thickness, 0, z1 - thickness,
+                        x1 + thickness, 0, z1 + thickness,
+                        x2 + thickness, 0, z2 + thickness,
+                        x2 - thickness, 0, z2 - thickness,
+                        r, g, b, a);
+            }
+        }
+
+        // Vertical line
+        quadC(matrix, buf,
+                -thickness, 0,          -thickness,
+                -thickness, lineHeight,  -thickness,
+                thickness, lineHeight,   thickness,
+                thickness, 0,            thickness,
+                r, g, b, a);
     }
 
     private void quadC(Matrix4f m, VertexConsumer buf,

@@ -57,6 +57,7 @@ public class CreateModernTech {
         modEventBus.addListener(CreateModernTech::clientInit);
         modEventBus.addListener(CreateModernTech::onLoadComplete);
         modEventBus.addListener(CreateModernTech::registerCapabilities);
+        modEventBus.addListener(ModCapabilities::register);
 
         NeoForge.EVENT_BUS.addListener(CreateModernTech::clientTick);
         NeoForge.EVENT_BUS.addListener(CreateModernTech::onLoadWorld);
