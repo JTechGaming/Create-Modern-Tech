@@ -12,6 +12,7 @@ import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplay
 import com.cybrisoft.createmoderntech.block.volumetric.shaft.VolumetricShaftBlockEntity;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
+import com.simibubi.create.content.kinetics.base.ShaftRenderer;
 import com.simibubi.create.content.kinetics.base.ShaftVisual;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 
@@ -58,6 +59,8 @@ public class ModBlockEntityTypes {
 
     public static final BlockEntityEntry<RegionalStressGaugeBlockEntity> REGIONAL_STRESS_GAUGE = REGISTRATE
             .blockEntity("regional_stress_gauge", RegionalStressGaugeBlockEntity::new)
+            .visual(() -> OrientedRotatingVisual.of(AllPartialModels.SHAFT_HALF))
+            .renderer(() -> ShaftRenderer::new)
             .validBlocks(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK)
             .register();
 

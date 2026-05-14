@@ -1,0 +1,27 @@
+{
+  "variants": {
+    "facing=up": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 270
+    },
+    "facing=down": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90
+    },
+    "facing=north": {
+      "model": "createmoderntech:block/regional_stress_gauge"
+    },
+    "facing=south": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "y": 270
+    },
+    "facing=east": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "y": 90
+    }
+  }
+}

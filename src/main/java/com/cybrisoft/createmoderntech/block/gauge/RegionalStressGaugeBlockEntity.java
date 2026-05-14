@@ -1,6 +1,8 @@
 package com.cybrisoft.createmoderntech.block.gauge;
 
+import com.cybrisoft.createmoderntech.registry.ModBlocks;
 import com.simibubi.create.content.kinetics.KineticNetwork;
+import com.simibubi.create.content.kinetics.base.GeneratingKineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -15,74 +17,154 @@ import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.List;
 
-public class RegionalStressGaugeBlockEntity extends SmartBlockEntity {
-    public float frontCapacity, frontDemand;
-    public float backCapacity, backDemand;
+public class RegionalStressGaugeBlockEntity extends GeneratingKineticBlockEntity {
+    public float pairedSpeed = 0;
+    public float pairedCapacity = 0;
+    public float pairedDemand = 0;
+    public float consumerDemandPerRpm = 0;
+
+    private int tickCounter = 0;
+    private boolean initializingSupplier = false;
 
     public RegionalStressGaugeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
 
     @Override
-    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-
+    public float calculateAddedStressCapacity() {
+        if (isSupplier()) return 0;
+        if (Math.abs(pairedSpeed) < 0.01f) return 0;
+        return pairedCapacity / Math.abs(pairedSpeed);
     }
 
-    private int tickCounter = 0;
+    @Override
+    public float calculateStressApplied() {
+        if (!isSupplier()) return super.calculateStressApplied();
+        if (initializingSupplier) return 0;
+        if (Math.abs(speed) < 0.01f) return 0;
+        lastStressApplied = consumerDemandPerRpm;
+        return consumerDemandPerRpm;
+    }
+
+    @Override
+    public float getGeneratedSpeed() {
+        if (isSupplier()) return 0;
+        return pairedSpeed;
+    }
+
+    @Override
+    public void initialize() {
+        if (level == null || level.isClientSide()) {
+            super.initialize();
+            return;
+        }
+
+        if (isSupplier()) {
+            initializingSupplier = true;
+            super.initialize();
+            initializingSupplier = false;
+            consumerDemandPerRpm = 0;
+            lastStressApplied = 0;
+        } else {
+            super.initialize();
+            pairedSpeed = 0;
+            pairedCapacity = 0;
+            pairedDemand = 0;
+            updateGeneratedRotation();
+        }
+        tickCounter = -20;
+    }
 
     @Override
     public void tick() {
         super.tick();
         if (level == null || level.isClientSide()) return;
-        if (++tickCounter < 10) return;
+
+        if (++tickCounter < 5) return;
         tickCounter = 0;
 
-        Direction facing = getBlockState().getValue(RegionalStressGaugeBlock.FACING);
-        readNetwork(facing, true);
-        readNetwork(facing.getOpposite(), false);
-        setChanged();
-        //System.out.println("front demand: " + frontDemand + " , capacity: " + frontCapacity);
-        //System.out.println("back demand: " + backDemand + " , capacity: " + backCapacity);
-        // sync to client
-        level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 3);
-    }
+        RegionalStressGaugeBlockEntity paired = getPaired();
+        if (paired == null) {
+            if (isSupplier()) {
+                consumerDemandPerRpm = 0;
+                lastStressApplied = 0;
+                KineticNetwork net = getOrCreateNetwork();
+                if (net != null) {
+                    net.updateStressFor(this, 0);
+                    net.updateStress();
+                }
+            } else {
+                pairedSpeed = 0;
+                pairedCapacity = 0;
+                pairedDemand = 0;
+                updateGeneratedRotation();
+            }
+            return;
+        }
 
-    private void readNetwork(Direction dir, boolean isFront) {
-        BlockEntity neighbor = level.getBlockEntity(worldPosition.relative(dir));
-        float capacity = 0, demand = 0;
+        if (isSupplier()) {
+            KineticNetwork net = getOrCreateNetwork();
+            if (net == null) {
+                paired.pairedSpeed = 0;
+                paired.pairedCapacity = 0;
+                paired.pairedDemand = 0;
+                paired.updateGeneratedRotation();
+                return;
+            }
 
-        if (neighbor instanceof KineticBlockEntity kinetic) {
-            KineticNetwork network = kinetic.getOrCreateNetwork();
-            if (network != null) {
-                capacity = network.calculateCapacity();
-                demand = network.calculateStress();
+            paired.pairedSpeed = this.speed;
+            paired.pairedCapacity = net.calculateCapacity();
+            paired.pairedDemand = net.calculateStress();
+            paired.updateGeneratedRotation();
+        } else {
+            KineticNetwork net = getOrCreateNetwork();
+            if (net == null) return;
+
+            float demand = net.calculateStress();
+            if (Math.abs(paired.speed) < 0.01f) return;
+
+            paired.consumerDemandPerRpm = demand / Math.abs(paired.speed);
+            paired.lastStressApplied = paired.consumerDemandPerRpm;
+            KineticNetwork pairedNet = paired.getOrCreateNetwork();
+            if (pairedNet != null) {
+                pairedNet.updateStressFor(paired, paired.consumerDemandPerRpm);
+                pairedNet.updateStress();
             }
         }
+    }
 
-        if (isFront) {
-            frontCapacity = capacity;
-            frontDemand = demand;
-        } else {
-            backCapacity = capacity;
-            backDemand = demand;
-        }
+    private boolean isSupplier() {
+        return getBlockState().getValue(RegionalStressGaugeBlock.SUPPLIER);
+    }
+
+    private RegionalStressGaugeBlockEntity getPaired() {
+        Direction facing = getBlockState().getValue(RegionalStressGaugeBlock.FACING);
+        BlockPos pairedPos = worldPosition.relative(facing.getOpposite());
+        BlockState pairedState = level.getBlockState(pairedPos);
+        if (!pairedState.is(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK.get())) return null;
+        if (pairedState.getValue(RegionalStressGaugeBlock.FACING) != facing.getOpposite()) return null;
+        if (pairedState.getValue(RegionalStressGaugeBlock.SUPPLIER) == isSupplier()) return null;
+        return level.getBlockEntity(pairedPos) instanceof RegionalStressGaugeBlockEntity be ? be : null;
     }
 
     @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
-        tag.putFloat("FrontCapacity", frontCapacity);
-        tag.putFloat("FrontDemand", frontDemand);
-        tag.putFloat("BackCapacity", backCapacity);
-        tag.putFloat("BackDemand", backDemand);
+        tag.putFloat("PairedSpeed", pairedSpeed);
+        tag.putFloat("PairedCapacity", pairedCapacity);
+        tag.putFloat("PairedDemand", pairedDemand);
+        tag.putFloat("ConsumerDemandPerRpm", consumerDemandPerRpm);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
-        frontCapacity = tag.getFloat("FrontCapacity");
-        frontDemand = tag.getFloat("FrontDemand");
-        backCapacity = tag.getFloat("BackCapacity");
-        backDemand = tag.getFloat("BackDemand");
+        pairedSpeed = tag.getFloat("PairedSpeed");
+        pairedCapacity = tag.getFloat("PairedCapacity");
+        pairedDemand = tag.getFloat("PairedDemand");
+        consumerDemandPerRpm = tag.getFloat("ConsumerDemandPerRpm");
     }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
 }

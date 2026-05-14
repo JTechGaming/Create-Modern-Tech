@@ -15,7 +15,11 @@ import com.cybrisoft.createmoderntech.block.volumetric.shaft.VolumetricShaftBloc
 import com.simibubi.create.foundation.data.AssetLookup;
 import com.simibubi.create.foundation.data.BuilderTransformers;
 import com.simibubi.create.foundation.data.SharedProperties;
+import com.simibubi.create.foundation.item.ItemDescription;
+import com.simibubi.create.foundation.item.KineticStats;
+import com.simibubi.create.foundation.item.TooltipModifier;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import net.createmod.catnip.lang.FontHelper;
 
 import static com.cybrisoft.createmoderntech.CreateModernTech.REGISTRATE;
 import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
@@ -23,7 +27,9 @@ import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
 @SuppressWarnings("removal")
 public class ModBlocks {
     public static final BlockEntry<VolumetricDisplayBlock> VOLUMETRIC_DISPLAY_BLOCK =
-            REGISTRATE.block("volumetric_display", VolumetricDisplayBlock::new)
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                    .andThen(TooltipModifier.mapNull(KineticStats.create(item))))
+                    .block("volumetric_display", VolumetricDisplayBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
@@ -47,7 +53,9 @@ public class ModBlocks {
                     .register();
 
     public static final BlockEntry<PanXControllerBlock> PAN_X_CONTROLLER_BLOCK =
-            REGISTRATE.block("pan_x_controller", PanXControllerBlock::new)
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                    .andThen(TooltipModifier.mapNull(KineticStats.create(item))))
+                    .block("pan_x_controller", PanXControllerBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
@@ -58,7 +66,9 @@ public class ModBlocks {
                     .simpleItem()
                     .register();
     public static final BlockEntry<PanZControllerBlock> PAN_Z_CONTROLLER_BLOCK =
-            REGISTRATE.block("pan_z_controller", PanZControllerBlock::new)
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                    .andThen(TooltipModifier.mapNull(KineticStats.create(item))))
+                    .block("pan_z_controller", PanZControllerBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
@@ -69,7 +79,9 @@ public class ModBlocks {
                     .simpleItem()
                     .register();
     public static final BlockEntry<PitchControllerBlock> PITCH_CONTROLLER_BLOCK =
-            REGISTRATE.block("pitch_controller", PitchControllerBlock::new)
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                    .andThen(TooltipModifier.mapNull(KineticStats.create(item))))
+                    .block("pitch_controller", PitchControllerBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
@@ -80,7 +92,8 @@ public class ModBlocks {
                     .simpleItem()
                     .register();
     public static final BlockEntry<YawControllerBlock> YAW_CONTROLLER_BLOCK =
-            REGISTRATE.block("yaw_controller", YawControllerBlock::new)
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                    .andThen(TooltipModifier.mapNull(KineticStats.create(item)))).block("yaw_controller", YawControllerBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
@@ -104,7 +117,7 @@ public class ModBlocks {
             REGISTRATE.block("regional_stress_gauge", RegionalStressGaugeBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
-                    .properties(p -> p.strength(0.8f))
+                    .properties(p -> p.noOcclusion().strength(0.8f))
                     .transform(axeOrPickaxe())
                     .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .simpleItem()
