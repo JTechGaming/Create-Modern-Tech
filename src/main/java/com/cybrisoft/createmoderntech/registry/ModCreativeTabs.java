@@ -59,6 +59,7 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.PITCH_CONTROLLER_BLOCK);
         pOutput.accept(ModBlocks.PAN_X_CONTROLLER_BLOCK);
         pOutput.accept(ModBlocks.PAN_Z_CONTROLLER_BLOCK);
+        pOutput.accept(ModBlocks.BEACON_CONTROLLER_BLOCK);
 
         pOutput.accept(ModBlocks.LENS_1X);
         pOutput.accept(ModBlocks.LENS_2X);
@@ -72,6 +73,8 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.PURPLE_COLOR_FILTER);
         pOutput.accept(ModBlocks.RED_COLOR_FILTER);
         pOutput.accept(ModBlocks.WHITE_COLOR_FILTER);
+
+        pOutput.accept(ModItems.BEACON_COMPASS);
     }
 
 

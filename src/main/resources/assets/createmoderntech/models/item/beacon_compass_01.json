@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "createmoderntech:item/beacon_compass_01"
+  }
+}

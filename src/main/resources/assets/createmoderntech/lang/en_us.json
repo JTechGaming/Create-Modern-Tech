@@ -19,7 +19,7 @@
   "block.createmoderntech.yaw_controller": "Volume Yaw Controller",
   "createmoderntech.ponder.volumetric_display.header": "Displaying the Surrounding Terrain",
   "createmoderntech.ponder.volumetric_display.text_1": "The Volumetric Display reads the surrounding terrain and projects a hologram",
-  "createmoderntech.ponder.volumetric_display.text_2": "The faster the input RPM, the bigger the hologram will be",
+  "createmoderntech.ponder.volumetric_display.text_2": "The faster the input RPM, the more geometry the hologram will show",
   "createmoderntech.ponder.volumetric_display.text_3": "Lenses can be placed on top to magnify or zoom the projection",
   "createmoderntech.ponder.volumetric_display.text_4": "A lens setup can be extended using lens extensions",
   "createmoderntech.ponder.volumetric_display.text_5": "A lens at the top will scale the projection by the strength",

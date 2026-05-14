@@ -1,15 +1,18 @@
 package com.cybrisoft.createmoderntech;
 
+import com.cybrisoft.createmoderntech.client.BeaconCompassClientEvents;
 import com.cybrisoft.createmoderntech.config.ModernTechAllConfigs;
 import com.cybrisoft.createmoderntech.ponder.ModernTechPonderPlugin;
 import com.cybrisoft.createmoderntech.registry.*;
 import com.mojang.logging.LogUtils;
+import com.simibubi.create.api.registry.CreateBuiltInRegistries;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
 import net.createmod.ponder.foundation.PonderIndex;
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
@@ -26,6 +29,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
 import org.slf4j.Logger;
 
 @Mod(CreateModernTech.MODID)
@@ -45,6 +49,7 @@ public class CreateModernTech {
         NeoForge.EVENT_BUS.register(this);
         REGISTRATE.registerEventListeners(modEventBus);
 
+        ModDataComponents.REGISTER.register(modEventBus);
         ModItems.register();
         ModBlocks.register();
         ModBlockEntityTypes.register();
@@ -58,6 +63,10 @@ public class CreateModernTech {
         modEventBus.addListener(CreateModernTech::onLoadComplete);
         modEventBus.addListener(CreateModernTech::registerCapabilities);
         modEventBus.addListener(ModCapabilities::register);
+        modEventBus.addListener((RegisterEvent event) -> {
+            ModArmInteractions.init();
+        });
+        modEventBus.addListener(BeaconCompassClientEvents::registerColors);
 
         NeoForge.EVENT_BUS.addListener(CreateModernTech::clientTick);
         NeoForge.EVENT_BUS.addListener(CreateModernTech::onLoadWorld);
@@ -90,6 +99,7 @@ public class CreateModernTech {
 
     public static void clientInit(FMLClientSetupEvent event) {
         PonderIndex.addPlugin(new ModernTechPonderPlugin());
+        BeaconCompassClientEvents.registerItemProperties();
     }
 
     public static Logger getLogger() {

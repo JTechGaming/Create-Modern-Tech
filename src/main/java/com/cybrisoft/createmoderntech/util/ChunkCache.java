@@ -70,8 +70,17 @@ public class ChunkCache {
                         int heightDiff = Math.max(1, worldY - lo);
 
                         newVoxels.add(new VoxelData(worldX, worldY, worldZ, heightDiff,
-                                exposedWest, exposedEast, exposedNorth, exposedSouth));
+                                exposedWest, exposedEast, exposedNorth, exposedSouth, false));
                     }
+                }
+
+                boolean hasData = level.hasChunk(worldChunkX, worldChunkZ) ||
+                        fallback.containsKey(ModPackets.packChunkPos(worldChunkX, worldChunkZ));
+                if (!hasData) {
+                    newVoxels.add(new VoxelData(
+                            (worldChunkX << 4) + 8, 63, (worldChunkZ << 4) + 8, 0,
+                            false, false, false, false, true
+                    ));
                 }
             }
         }
@@ -98,22 +107,22 @@ public class ChunkCache {
     /** Returns the live voxel list, is render thread only. */
     public List<VoxelData> getVoxels() { return voxels; }
 
-    /** Returns a safe immutable copy for the background build thread. */
-    public List<VoxelData> snapshotVoxels() { return new ArrayList<>(voxels); }
+    public List<VoxelData> snapshotVoxels() { return voxels; }
 
     /** Swaps in a newly built voxel list from the async build, is render thread only. */
     public void swapVoxels(List<VoxelData> newVoxels) { voxels = newVoxels; }
 
     public static class VoxelData {
         public final int x, y, z, height;
-        public final boolean exposedWest, exposedEast, exposedNorth, exposedSouth;
+        public final boolean exposedWest, exposedEast, exposedNorth, exposedSouth, isPlaceholder;
 
         VoxelData(int x, int y, int z, int height,
                   boolean exposedWest, boolean exposedEast,
-                  boolean exposedNorth, boolean exposedSouth) {
+                  boolean exposedNorth, boolean exposedSouth, boolean isPlaceholder) {
             this.x = x; this.y = y; this.z = z; this.height = height;
             this.exposedWest = exposedWest; this.exposedEast = exposedEast;
             this.exposedNorth = exposedNorth; this.exposedSouth = exposedSouth;
+            this.isPlaceholder = isPlaceholder;
         }
     }
 }

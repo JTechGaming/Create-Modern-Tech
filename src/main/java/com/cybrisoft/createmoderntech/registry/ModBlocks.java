@@ -1,6 +1,7 @@
 package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlock;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlock;
 import com.cybrisoft.createmoderntech.config.ModernTechStress;
 import com.cybrisoft.createmoderntech.block.lens.VerticalLensBlock;
@@ -91,6 +92,16 @@ public class ModBlocks {
                     .register();
     public static final BlockEntry<BeaconControllerBlock> BEACON_CONTROLLER_BLOCK =
             REGISTRATE.block("beacon_controller", BeaconControllerBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .simpleItem()
+                    .register();
+
+    public static final BlockEntry<RegionalStressGaugeBlock> REGIONAL_STRESS_GAUGE_BLOCK =
+            REGISTRATE.block("regional_stress_gauge", RegionalStressGaugeBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .properties(p -> p.strength(0.8f))

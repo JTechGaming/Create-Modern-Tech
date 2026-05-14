@@ -1,6 +1,7 @@
 package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanXControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanZControllerBlockEntity;
@@ -53,6 +54,11 @@ public class ModBlockEntityTypes {
     public static final BlockEntityEntry<BeaconControllerBlockEntity> BEACON_CONTROLLER = REGISTRATE
             .blockEntity("beacon_controller", BeaconControllerBlockEntity::new)
             .validBlocks(ModBlocks.BEACON_CONTROLLER_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<RegionalStressGaugeBlockEntity> REGIONAL_STRESS_GAUGE = REGISTRATE
+            .blockEntity("regional_stress_gauge", RegionalStressGaugeBlockEntity::new)
+            .validBlocks(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK)
             .register();
 
     public static void register() {

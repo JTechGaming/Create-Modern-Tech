@@ -1,5 +1,6 @@
 package com.cybrisoft.createmoderntech.block.volumetric.display;
 
+import com.cybrisoft.createmoderntech.CreateModernTech;
 import com.cybrisoft.createmoderntech.registry.ModBlocks;
 import com.cybrisoft.createmoderntech.registry.ModPackets;
 import com.cybrisoft.createmoderntech.util.ChunkCache;
@@ -138,14 +139,35 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         }
 
         // Cache update triggers when ceil radius changes or center moves
+        boolean chunkChanged = false;
+        if (blockEntity.lastCenterPos != null) {
+            int lastCX = blockEntity.lastCenterPos.getX() >> 4;
+            int lastCZ = blockEntity.lastCenterPos.getZ() >> 4;
+            int newCX = sampleCenter.getX() >> 4;
+            int newCZ = sampleCenter.getZ() >> 4;
+            chunkChanged = lastCX != newCX || lastCZ != newCZ;
+        }
         if (blockEntity.lastIntRadius != sampleRadius ||
                 blockEntity.lastCenterPos == null ||
-                blockEntity.lastCenterPos.distSqr(sampleCenter) > 64) {
-            blockEntity.chunkCache.update(worldLevel, sampleCenter, sampleRadius, blockEntity.heightmapCache);
-            blockEntity.lastCacheUpdate = currentTime;
+                chunkChanged) {
             blockEntity.pendingIntCenter = sampleCenter;
             blockEntity.lastIntRadius = sampleRadius;
             blockEntity.vboDirty = true;
+
+            // Evict heightmap cache entries too far from current center
+            if (blockEntity.heightmapCache.size() > 1024) {
+                int cx = sampleCenter.getX() >> 4;
+                int cz = sampleCenter.getZ() >> 4;
+                int maxDist = MAX_CHUNK_RADIUS + 4;
+                blockEntity.heightmapCache.entrySet().removeIf(entry -> {
+                    long key = entry.getKey();
+                    int ecx = (int)(key & 0xFFFFFFFFL);
+                    int ecz = (int)(key >> 32);
+                    int dx = ecx - cx;
+                    int dz = ecz - cz;
+                    return dx * dx + dz * dz > maxDist * maxDist;
+                });
+            }
         }
 
         // --- Lens config ---
@@ -200,8 +222,8 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         ms.translate(0.5, DISPLAY_HEIGHT + offset, 0.5);
         ms.mulPose(Axis.YP.rotationDegrees(blockEntity.yaw));
         ms.mulPose(Axis.XP.rotationDegrees(blockEntity.pitch));
-        renderVolumetricDisplay(ms, bufferSource, blockEntity, cameraView, deltaTicks,
-                new Vector3f(renderCenterX, sampleCenter.getY(), renderCenterZ), magnification, color);
+        renderVolumetricDisplay(ms, bufferSource, worldLevel, blockEntity, cameraView, deltaTicks,
+                new Vector3f(renderCenterX, sampleCenter.getY(), renderCenterZ), sampleRadius, magnification, color);
         ms.popPose();
     }
 
@@ -242,13 +264,13 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
     }
 
     private void renderVolumetricDisplay(PoseStack ms, MultiBufferSource bufferSource,
-                                         VolumetricDisplayBlockEntity blockEntity,
+                                         Level worldLevel, VolumetricDisplayBlockEntity blockEntity,
                                          Matrix4f cameraView, float deltaTicks,
-                                         Vector3f sampleCenter, float magnification, float[] color) {
+                                         Vector3f sampleCenter, int sampleRadius, float magnification, float[] color) {
         float time = blockEntity.getLevel().getGameTime() + AnimationTickHolder.getPartialTicks();
         float pulse = 1.0f + ((float) Math.sin(time * 0.02f) * 0.02f);
 
-        float scanSpeed = (blockEntity.currentRadius / MAX_CHUNK_RADIUS) * 0.1f;
+        float scanSpeed = (blockEntity.targetRadius / MAX_CHUNK_RADIUS) * 0.1f;
         float scanPos = (time * scanSpeed) % 10.0f;
 
         // Upload finished async build if ready
@@ -259,8 +281,9 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                 blockEntity.staticVBO.bind();
                 blockEntity.staticVBO.upload(blockEntity.pendingMesh);
                 VertexBuffer.unbind();
+                blockEntity.pendingMesh.close();
                 blockEntity.pendingMesh = null;
-                blockEntity.lastCenterPos = blockEntity.pendingIntCenter;
+                blockEntity.lastCenterPos = blockEntity.bakingIntCenter;
             }
             if (blockEntity.pendingVoxels != null) {
                 blockEntity.chunkCache.swapVoxels(blockEntity.pendingVoxels);
@@ -273,9 +296,10 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         if (blockEntity.vboDirty && blockEntity.rebuildFuture == null) {
             blockEntity.vboDirty = false;
 
-            List<ChunkCache.VoxelData> snapshot = blockEntity.chunkCache.snapshotVoxels();
-            BlockPos capIntCenter = blockEntity.pendingIntCenter;
+            blockEntity.bakingIntCenter = blockEntity.pendingIntCenter;
+            BlockPos capIntCenter = blockEntity.bakingIntCenter;
             float[] capColor = color;
+            int capSampleRadius = sampleRadius;
 
             if (blockEntity.pendingMesh != null) {
                 blockEntity.pendingMesh.close();
@@ -283,7 +307,14 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             }
 
             blockEntity.rebuildFuture = CompletableFuture.runAsync(() -> {
-                ByteBufferBuilder byteBuffer = new ByteBufferBuilder(snapshot.size() * 5 * 8 * 28);
+                blockEntity.chunkCache.update(worldLevel, capIntCenter, capSampleRadius, blockEntity.heightmapCache);
+
+                List<ChunkCache.VoxelData> snapshot = blockEntity.chunkCache.snapshotVoxels();
+
+                if (blockEntity.sharedByteBuffer == null) {
+                    blockEntity.sharedByteBuffer = new ByteBufferBuilder(8 * 1024 * 1024);
+                }
+                ByteBufferBuilder byteBuffer = blockEntity.sharedByteBuffer;
                 BufferBuilder builder = new BufferBuilder(byteBuffer, VertexFormat.Mode.QUADS,
                         DefaultVertexFormat.POSITION_COLOR);
 
@@ -358,7 +389,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             drawVoxelToConsumer(matrix, scanBuffer, posX, posY, posZ, voxel.height, voxel, r, g, b, a, scale);
         }
 
-        drawCursor(ms.last().pose(), scanBuffer, scale, color, time, false);
+        drawCursor(ms.last().pose(), scanBuffer, scale, color, time, false, true);
 
         for (VolumetricDisplayBlockEntity.BeaconData beacon : blockEntity.beacons) {
             float relX = beacon.x - sampleCenter.x();
@@ -373,7 +404,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
 
             ms.pushPose();
             ms.translate(relX * VOXEL_SIZE * scale, 0, relZ * VOXEL_SIZE * scale);
-            drawCursor(ms.last().pose(), scanBuffer, scale, beaconColor, time, xOutOfRange || zOutOfRange);
+            drawCursor(ms.last().pose(), scanBuffer, scale, beaconColor, time, xOutOfRange || zOutOfRange, false);
             ms.popPose();
         }
     }
@@ -387,9 +418,24 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                                      ChunkCache.VoxelData voxel,
                                      float r, float g, float b, float a, float scale) {
         float s = VOXEL_SHAPE_SIZE * scale;
+        if (h > 64) {
+            h = 0;
+        }
         float d = h * VOXEL_SIZE * scale;
-        quadC(matrix, buf, x-s,y,z-s, x-s,y,z+s, x+s,y,z+s, x+s,y,z-s, r,g,b,a);
-        if (h <= 1) return;
+        quadC(matrix, buf, x-s,y,z-s, x-s,y,z+s, x+s,y,z+s, x+s,y,z-s, r,g,b,a); // draw top
+
+        if (voxel.isPlaceholder) {
+            // 16 blocks * VOXEL_SIZE / 2, minus gap
+            float chunkHalf = 16 * VOXEL_SIZE * 0.5f - 0.003f;
+            quadC(matrix, buf, x - chunkHalf, y, z - chunkHalf,
+                    x - chunkHalf, y, z + chunkHalf,
+                    x + chunkHalf, y, z + chunkHalf,
+                    x + chunkHalf, y, z - chunkHalf,
+                    r, g, b, a);
+            return; // no sides
+        }
+        if (h <= 0) return;
+        // draw sides
         if (voxel.exposedWest)  quadC(matrix,buf, x-s,y,z+s, x-s,y-d,z+s, x-s,y-d,z-s, x-s,y,z-s, r,g,b,a);
         if (voxel.exposedEast)  quadC(matrix,buf, x+s,y,z-s, x+s,y-d,z-s, x+s,y-d,z+s, x+s,y,z+s, r,g,b,a);
         if (voxel.exposedNorth) quadC(matrix,buf, x-s,y,z-s, x-s,y-d,z-s, x+s,y-d,z-s, x+s,y,z-s, r,g,b,a);
@@ -401,16 +447,30 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                                     ChunkCache.VoxelData voxel,
                                     float r, float g, float b, float a) {
         float s = VOXEL_SHAPE_SIZE;
+        if (h > 64) {
+            h = 0;
+        }
         float d = h * VOXEL_SIZE;
-        quadB(buf, x-s,y,z-s, x-s,y,z+s, x+s,y,z+s, x+s,y,z-s, r,g,b,a);
-        if (h <= 1) return;
+        quadB(buf, x-s,y,z-s, x-s,y,z+s, x+s,y,z+s, x+s,y,z-s, r,g,b,a); // draw top face
+        if (voxel.isPlaceholder) {
+            // 16 blocks * VOXEL_SIZE / 2, minus gap
+            float chunkHalf = 16 * VOXEL_SIZE * 0.5f - 0.003f;
+            quadB(buf, x - chunkHalf, y, z - chunkHalf,
+                    x - chunkHalf, y, z + chunkHalf,
+                    x + chunkHalf, y, z + chunkHalf,
+                    x + chunkHalf, y, z - chunkHalf,
+                    r, g, b, a);
+            return; // no sides
+        }
+        if (h <= 0) return;
+        // draw sides
         if (voxel.exposedWest)  quadB(buf, x-s,y,z+s, x-s,y-d,z+s, x-s,y-d,z-s, x-s,y,z-s, r,g,b,a);
         if (voxel.exposedEast)  quadB(buf, x+s,y,z-s, x+s,y-d,z-s, x+s,y-d,z+s, x+s,y,z+s, r,g,b,a);
         if (voxel.exposedNorth) quadB(buf, x-s,y,z-s, x-s,y-d,z-s, x+s,y-d,z-s, x+s,y,z-s, r,g,b,a);
         if (voxel.exposedSouth) quadB(buf, x+s,y,z+s, x+s,y-d,z+s, x-s,y-d,z+s, x-s,y,z+s, r,g,b,a);
     }
 
-    private void drawCursor(Matrix4f matrix, VertexConsumer buf, float scale, float[] color, float time, boolean outOfRange) {
+    private void drawCursor(Matrix4f matrix, VertexConsumer buf, float scale, float[] color, float time, boolean outOfRange, boolean isCenter) {
         float r = color[0];
         float g = color[1];
         float b = color[2];
@@ -418,7 +478,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
 
         // Pulsing size
         float cursorRadius = 0.045f * scale * (1.0f + (float) Math.sin(time * 0.3f) * 0.15f);
-        float lineHeight = 0.26f * scale;
+        float lineHeight = isCenter ? 0.26f * scale : 0.45f * scale;
         float thickness = 0.002f * scale;
 
         // approximated circle with 16 line segments as thin quads
@@ -438,6 +498,14 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                         x2 + thickness, 0, z2 + thickness,
                         x2 - thickness, 0, z2 - thickness,
                         r, g, b, a);
+            }
+            if (isCenter) {
+                float armLength = 0.05f * scale;
+                float armThickness = 0.003f * scale;
+                quadC(matrix, buf, -armLength, 0, -armThickness, -armLength, 0, armThickness,
+                        armLength, 0, armThickness, armLength, 0, -armThickness, r, g, b, a);
+                quadC(matrix, buf, -armThickness, 0, -armLength, armThickness, 0, -armLength,
+                        armThickness, 0, armLength, -armThickness, 0, armLength, r, g, b, a);
             }
         }
 

@@ -3,28 +3,25 @@ package com.cybrisoft.createmoderntech.block.volumetric.controller.beacon;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.VolumetricControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.shaft.VolumetricShaftBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
+import com.cybrisoft.createmoderntech.item.BeaconCompassData;
+import com.cybrisoft.createmoderntech.registry.ModDataComponents;
+import com.cybrisoft.createmoderntech.registry.ModItems;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity {
-    // Output slot for compass items
-    public final ItemStackHandler outputInventory = new ItemStackHandler(1) {
+    public final SimpleContainer outputInventory = new SimpleContainer(1) {
         @Override
-        public boolean isItemValid(int slot, ItemStack stack) { return false; } // output only
+        public void setChanged() {
+            super.setChanged();
+            BeaconControllerBlockEntity.this.setChanged();
+        }
     };
 
     // Assigned colors for beacons in order
@@ -82,8 +79,6 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
             // Clear the overlapping beacon
             display.beacons.remove(overlapping);
             display.notifyUpdate();
-            // Emit redstone pulse on the shaft side (signal that a beacon was cleared)
-            // handled by block state or separate mechanism if needed
         } else {
             // Add a new beacon at cursor position
             int color = BEACON_COLORS[nextColorIndex % BEACON_COLORS.length];
@@ -101,8 +96,24 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
         VolumetricDisplayBlockEntity display = getLinkedDisplay();
         if (display == null) return;
 
-        float cursorX = display.getBlockPos().getX() + display.smoothPanX;
-        float cursorZ = display.getBlockPos().getZ() + display.smoothPanZ;
+        VolumetricDisplayBlockEntity.BeaconData selected = getNearestBeacon(display);
+
+        if (selected == null) return;
+
+        ItemStack compass = new ItemStack(ModItems.BEACON_COMPASS.get());
+        BeaconCompassData data = new BeaconCompassData(selected.x, selected.z, selected.color, "Beacon");
+        compass.set(ModDataComponents.BEACON_TARGET, data);
+
+        // Place in output slot if empty
+        if (outputInventory.getItem(0).isEmpty()) {
+            outputInventory.setItem(0, compass);
+            setChanged();
+        }
+    }
+
+    private static VolumetricDisplayBlockEntity.BeaconData getNearestBeacon(VolumetricDisplayBlockEntity display) {
+        float cursorX = display.getBlockPos().getX() + display.panX;
+        float cursorZ = display.getBlockPos().getZ() + display.panZ;
 
         // Find nearest beacon to cursor
         VolumetricDisplayBlockEntity.BeaconData selected = null;
@@ -116,22 +127,8 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
                 selected = beacon;
             }
         }
-
-        if (selected == null) return;
-
-        // Create a compass with beacon coordinates stored as NBT
-        ItemStack compass = new ItemStack(Items.COMPASS);
-        CompoundTag tag = new CompoundTag();
-        tag.putFloat("BeaconX", selected.x);
-        tag.putFloat("BeaconZ", selected.z);
-        tag.putInt("BeaconColor", selected.color);
-        compass.set(DataComponents.CUSTOM_DATA, CustomData.of(tag));
-
-        // Place in output slot if empty
-        if (outputInventory.getStackInSlot(0).isEmpty()) {
-            outputInventory.setStackInSlot(0, compass);
-            setChanged();
-        }
+        if (bestDist > 100f) return null;// 10 blocks radius = 100 when squared
+        return selected;
     }
 
     /**
@@ -152,15 +149,13 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         tag.putInt("NextColorIndex", nextColorIndex);
-        tag.put("OutputInventory", outputInventory.serializeNBT(registries));
+        ContainerHelper.saveAllItems(tag, outputInventory.getItems(), registries);
     }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
         nextColorIndex = tag.getInt("NextColorIndex");
-        if (tag.contains("OutputInventory")) {
-            outputInventory.deserializeNBT(registries, tag.getCompound("OutputInventory"));
-        }
+        ContainerHelper.loadAllItems(tag, outputInventory.getItems(), registries);
     }
 }

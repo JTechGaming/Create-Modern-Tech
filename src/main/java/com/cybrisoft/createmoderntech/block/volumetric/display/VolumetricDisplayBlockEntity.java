@@ -2,6 +2,7 @@ package com.cybrisoft.createmoderntech.block.volumetric.display;
 
 import com.cybrisoft.createmoderntech.block.volumetric.shaft.VolumetricShaftBlockEntity;
 import com.cybrisoft.createmoderntech.util.ChunkCache;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.VertexBuffer;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -50,7 +51,9 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
     public long lastCacheUpdate = 0;
     BlockPos lastCenterPos = null;
     public BlockPos pendingIntCenter;
+    public BlockPos bakingIntCenter;
     public final Map<Long, short[]> heightmapCache = new HashMap<>();
+    ByteBufferBuilder sharedByteBuffer = null;
 
     // --- VBO state ---
     VertexBuffer staticVBO = null;
@@ -97,6 +100,25 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
         for (int i = 0; i < beaconList.size(); i++) {
             CompoundTag b = beaconList.getCompound(i);
             beacons.add(new BeaconData(b.getFloat("X"), b.getFloat("Z"), b.getInt("Color")));
+        }
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        if (level != null && level.isClientSide) {
+            if (staticVBO != null) {
+                staticVBO.close();
+                staticVBO = null;
+            }
+            if (pendingMesh != null) {
+                pendingMesh.close();
+                pendingMesh = null;
+            }
+        }
+        if (sharedByteBuffer != null) {
+            sharedByteBuffer.close();
+            sharedByteBuffer = null;
         }
     }
 

@@ -73,7 +73,7 @@ public class PonderScenes {
         scene.world().modifyBlockEntity(new BlockPos(4, 0, 2), KineticBlockEntity.class, be -> be.setSpeed(-256f));
 
         scene.overlay().showText(40)
-                .text("The faster the input RPM, the bigger the hologram will be")
+                .text("The faster the input RPM, the more geometry the hologram will show")
                 .pointAt(util.vector().topOf(2, 3, 2))
                 .attachKeyFrame();
         scene.idle(50);
