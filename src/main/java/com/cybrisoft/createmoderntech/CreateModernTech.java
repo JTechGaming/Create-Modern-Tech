@@ -4,6 +4,8 @@ import com.cybrisoft.createmoderntech.client.BeaconCompassClientEvents;
 import com.cybrisoft.createmoderntech.config.ModernTechAllConfigs;
 import com.cybrisoft.createmoderntech.ponder.ModernTechPonderPlugin;
 import com.cybrisoft.createmoderntech.registry.*;
+import com.cybrisoft.createmoderntech.tts.FreeTTSEngine;
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.api.registry.CreateBuiltInRegistries;
 import com.simibubi.create.foundation.data.CreateRegistrate;
@@ -12,10 +14,13 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import net.createmod.catnip.lang.FontHelper;
 import net.createmod.ponder.foundation.PonderIndex;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -26,10 +31,12 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
+import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.level.LevelEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 
 @Mod(CreateModernTech.MODID)
@@ -43,10 +50,16 @@ public class CreateModernTech {
                     new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
                             .andThen(TooltipModifier.mapNull(KineticStats.create(item))));
 
+    public static final KeyMapping TEST_SPEAK = new KeyMapping(
+            "key.createmoderntech.test_speak",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_F8,
+            "key.categories.createmoderntech"
+    );
+
     public CreateModernTech(IEventBus modEventBus, ModContainer modContainer) {
         getLogger().info("Initializing Create: Modern Tech!");
 
-        NeoForge.EVENT_BUS.register(this);
         REGISTRATE.registerEventListeners(modEventBus);
 
         ModDataComponents.REGISTER.register(modEventBus);
@@ -62,6 +75,7 @@ public class CreateModernTech {
         modEventBus.addListener(CreateModernTech::clientInit);
         modEventBus.addListener(CreateModernTech::onLoadComplete);
         modEventBus.addListener(CreateModernTech::registerCapabilities);
+        modEventBus.addListener(CreateModernTech::registerKeyMappings);
         modEventBus.addListener(ModCapabilities::register);
         modEventBus.addListener((RegisterEvent event) -> {
             ModArmInteractions.init();
@@ -76,11 +90,18 @@ public class CreateModernTech {
         return ResourceLocation.tryBuild(MODID, path);
     }
 
-    @SubscribeEvent
-    public void onRegisterCommands(RegisterCommandsEvent event) {
+    public static void registerKeyMappings(RegisterKeyMappingsEvent event) {
+        event.register(TEST_SPEAK);
     }
 
     private static void clientTick(ClientTickEvent.Post event) {
+        if (TEST_SPEAK.consumeClick()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                Vec3 pos = mc.player.position();
+                FreeTTSEngine.speak("critical engine failure", pos, 32f);
+            }
+        }
     }
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -100,6 +121,7 @@ public class CreateModernTech {
     public static void clientInit(FMLClientSetupEvent event) {
         PonderIndex.addPlugin(new ModernTechPonderPlugin());
         BeaconCompassClientEvents.registerItemProperties();
+        FreeTTSEngine.initialize();
     }
 
     public static Logger getLogger() {

@@ -78,8 +78,10 @@ neoForge {
     runs {
         client {
             client()
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            jvmArguments.addAll(
+                    '--add-opens=java.base/java.lang=ALL-UNNAMED',
+                    '--add-opens=java.base/java.util=ALL-UNNAMED'
+            )
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -177,6 +179,30 @@ dependencies {
     }
 
     jarJar(api("dev.ryanhcode.sable-companion:sable-companion-common-${minecraft_version}:${sable_companion_version}"))
+
+    implementation files('libs/freetts.jar', 'libs/cmu_us_kal.jar', 'libs/cmulex.jar', 'libs/en_us.jar')
+    jarJar(files('libs/freetts.jar', 'libs/cmu_us_kal.jar', 'libs/cmulex.jar', 'libs/en_us.jar'))
+}
+
+tasks.named('processResources') {
+    dependsOn extractFreeTTS
+}
+
+tasks.named('classes') {
+    dependsOn extractFreeTTS
+}
+
+task extractFreeTTS(type: Copy) {
+    from {
+        fileTree('libs').filter { it.name.endsWith('.jar') }.collect { zipTree(it) }
+    }
+    into layout.buildDirectory.dir('classes/java/main')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude 'META-INF/**'
+}
+
+tasks.named('compileJava') {
+    dependsOn extractFreeTTS
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.

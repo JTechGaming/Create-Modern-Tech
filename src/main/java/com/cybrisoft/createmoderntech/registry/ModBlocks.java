@@ -1,7 +1,11 @@
 package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlock;
+import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockItem;
 import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlock;
+import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlock;
+import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockItem;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlock;
 import com.cybrisoft.createmoderntech.config.ModernTechStress;
 import com.cybrisoft.createmoderntech.block.lens.VerticalLensBlock;
@@ -121,6 +125,26 @@ public class ModBlocks {
                     .transform(axeOrPickaxe())
                     .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .simpleItem()
+                    .register();
+
+    public static final BlockEntry<SpeakerBlock> SPEAKER_BLOCK =
+            REGISTRATE.block("speaker", SpeakerBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .item(SpeakerBlockItem::new).build()
+                    .register();
+
+    public static final BlockEntry<AudioTriggerBlock> AUDIO_TRIGGER_BLOCK =
+            REGISTRATE.block("audio_trigger", AudioTriggerBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .item(AudioTriggerBlockItem::new).build()
                     .register();
 
     public static final BlockEntry<VerticalLensBlock> LENS_1X = registerLens("lens_1x");

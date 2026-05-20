@@ -1,7 +1,9 @@
 package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockEntity;
 import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlockEntity;
+import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanXControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanZControllerBlockEntity;
@@ -62,6 +64,16 @@ public class ModBlockEntityTypes {
             .visual(() -> OrientedRotatingVisual.of(AllPartialModels.SHAFT_HALF))
             .renderer(() -> ShaftRenderer::new)
             .validBlocks(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<SpeakerBlockEntity> SPEAKER = REGISTRATE
+            .blockEntity("speaker", SpeakerBlockEntity::new)
+            .validBlocks(ModBlocks.SPEAKER_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<AudioTriggerBlockEntity> AUDIO_TRIGGER = REGISTRATE
+            .blockEntity("audio_trigger", AudioTriggerBlockEntity::new)
+            .validBlocks(ModBlocks.AUDIO_TRIGGER_BLOCK)
             .register();
 
     public static void register() {
