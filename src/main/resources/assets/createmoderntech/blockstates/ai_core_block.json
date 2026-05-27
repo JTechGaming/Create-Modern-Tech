@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "createmoderntech:block/ai_core_block"
+    }
+  }
+}

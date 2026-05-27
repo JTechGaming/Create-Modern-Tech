@@ -43,7 +43,7 @@ public class VolumetricShaftBlockEntity extends KineticBlockEntity {
      * Scans upward to find the display and outward at each shaft Y level to find controllers.
      * Called lazily when the layout is marked dirty by a neighbor change.
      */
-    private void refreshLayout() {
+    public void refreshLayout() {
         cachedDisplayPos = null;
 
         // Walk upward through the shaft column

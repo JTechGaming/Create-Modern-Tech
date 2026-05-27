@@ -26,10 +26,14 @@ public class BeaconCompassClientEvents {
 
     public static void registerColors(RegisterColorHandlersEvent.Item event) {
         event.register((stack, tintIndex) -> {
-            if (tintIndex != 1) return 0xFFFFFF; // tint index 0 = base texture
+            if (tintIndex != 1) return -1;
+
             BeaconCompassData data = stack.get(ModDataComponents.BEACON_TARGET.get());
-            if (data == null) return 0xFFFFFF;
-            return data.packedRGB();
+            if (data == null) return -1;
+
+            int rgb = data.packedRGB();
+
+            return 0xFF000000 | rgb;
         }, ModItems.BEACON_COMPASS.get());
     }
 }

@@ -180,8 +180,8 @@ dependencies {
 
     jarJar(api("dev.ryanhcode.sable-companion:sable-companion-common-${minecraft_version}:${sable_companion_version}"))
 
-    implementation files('libs/freetts.jar', 'libs/cmu_us_kal.jar', 'libs/cmulex.jar', 'libs/en_us.jar')
-    jarJar(files('libs/freetts.jar', 'libs/cmu_us_kal.jar', 'libs/cmulex.jar', 'libs/en_us.jar'))
+    implementation files('libs/jadapter-for-native-tts-0.12.0.jar')
+    jarJar(files('libs/jadapter-for-native-tts-0.12.0.jar'))
 }
 
 tasks.named('processResources') {

@@ -15,7 +15,16 @@ public class ModPonderIndex implements PonderPlugin {
                 helper.withKeyFunction(RegistryEntry::getId);
 
         HELPER.forComponents(ModBlocks.VOLUMETRIC_DISPLAY_BLOCK)
-                .addStoryBoard("volumetric_display", PonderScenes::volumetricDisplay);
+                .addStoryBoard("volumetric_display", PonderScenes::volumetricDisplay)
+                .addStoryBoard("lens_extensions", PonderScenes::lensExtensions)
+                .addStoryBoard("beacon_controller", PonderScenes::beaconController);
+
+        HELPER.forComponents(ModBlocks.LIGHT_BOOST_FILTER, ModBlocks.TELEPHOTO_EXTENSION, ModBlocks.LIME_COLOR_FILTER,
+                ModBlocks.RED_COLOR_FILTER, ModBlocks.PURPLE_COLOR_FILTER, ModBlocks.WHITE_COLOR_FILTER
+        ).addStoryBoard("lens_extensions", PonderScenes::lensExtensions);
+
+        HELPER.forComponents(ModBlocks.BEACON_CONTROLLER_BLOCK)
+                .addStoryBoard("beacon_controller", PonderScenes::beaconController);
     }
 
     @Override

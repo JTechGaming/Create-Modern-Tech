@@ -4,6 +4,8 @@ import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
 import com.cybrisoft.createmoderntech.network.PlaySpeakerPacket;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import dev.ryanhcode.sable.companion.SableCompanion;
+import dev.ryanhcode.sable.companion.SubLevelAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -13,7 +15,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
+import org.joml.Vector3d;
+import org.joml.Vector3dc;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +28,6 @@ import java.util.UUID;
 public class AudioTriggerBlockEntity extends SmartBlockEntity {
     public UUID networkId = null;
     public String message = "";
-    private int cooldownTicks = 0;
     private boolean wasPowered = false;
 
     public AudioTriggerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -35,7 +39,6 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
 
     public void tick() {
         if (level == null || level.isClientSide()) return;
-        if (cooldownTicks > 0) { cooldownTicks--; return; }
 
         boolean isPowered = level.hasNeighborSignal(worldPosition);
         if (isPowered && !wasPowered) {
@@ -46,7 +49,6 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
 
     private void trigger() {
         if (networkId == null || message.isBlank()) return;
-        cooldownTicks = message.length() * 4;
 
         List<BlockPos> speakerPositions = new ArrayList<>();
         ServerLevel serverLevel = (ServerLevel) level;
@@ -72,8 +74,21 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
         String msg = this.message;
 
         for (ServerPlayer player : serverLevel.players()) {
-            PacketDistributor.sendToPlayer(player,
-                    new PlaySpeakerPacket(netId, msg, speakerPositions));
+            boolean inRange = speakerPositions.stream().anyMatch(speakerPos -> {
+                    SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(level, speakerPos);
+                    Vec3 playerPos = player.position();
+                    if (subLevel != null) {
+                        Vector3dc shipPos = subLevel.logicalPose().position();
+                        playerPos.add(shipPos.x(), shipPos.y(), shipPos.z());
+                    }
+                    return playerPos.distanceTo(Vec3.atCenterOf(speakerPos)) <=
+                            ((SpeakerBlockEntity) serverLevel.getBlockEntity(speakerPos)).range;
+            });
+
+            if (inRange) {
+                PacketDistributor.sendToPlayer(player,
+                        new PlaySpeakerPacket(netId, msg, speakerPositions));
+            }
         }
     }
 
@@ -82,7 +97,6 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
         super.write(tag, registries, clientPacket);
         if (networkId != null) tag.putUUID("NetworkId", networkId);
         tag.putString("Message", message);
-        tag.putInt("Cooldown", cooldownTicks);
     }
 
     @Override
@@ -90,6 +104,5 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
         super.read(tag, registries, clientPacket);
         networkId = tag.hasUUID("NetworkId") ? tag.getUUID("NetworkId") : null;
         message = tag.getString("Message");
-        cooldownTicks = tag.getInt("Cooldown");
     }
 }

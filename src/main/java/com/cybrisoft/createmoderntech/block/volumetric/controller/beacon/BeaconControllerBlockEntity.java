@@ -6,14 +6,20 @@ import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplay
 import com.cybrisoft.createmoderntech.item.BeaconCompassData;
 import com.cybrisoft.createmoderntech.registry.ModDataComponents;
 import com.cybrisoft.createmoderntech.registry.ModItems;
+import com.simibubi.create.content.trains.schedule.condition.TimedWaitCondition;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity {
     public final SimpleContainer outputInventory = new SimpleContainer(1) {
@@ -37,6 +43,8 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
     };
 
     private int nextColorIndex = 0;
+    protected boolean shouldRenderItem = false;
+    protected ItemStack renderStack = ItemStack.EMPTY;
 
     public BeaconControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -50,8 +58,13 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
 
     @Override
     public void tick() {
-        // don't use the standard float accumulation
-        if (level == null || level.isClientSide()) return;
+        if (level != null && !level.isClientSide) {
+            if (this.shouldRenderItem && this.outputInventory.getItem(0).isEmpty()) {
+                this.shouldRenderItem = false;
+                this.renderStack = ItemStack.EMPTY;
+                this.notifyUpdate();
+            }
+        }
     }
 
     /**
@@ -97,18 +110,24 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
         if (display == null) return;
 
         VolumetricDisplayBlockEntity.BeaconData selected = getNearestBeacon(display);
-
         if (selected == null) return;
 
         ItemStack compass = new ItemStack(ModItems.BEACON_COMPASS.get());
         BeaconCompassData data = new BeaconCompassData(selected.x, selected.z, selected.color, "Beacon");
         compass.set(ModDataComponents.BEACON_TARGET, data);
 
-        // Place in output slot if empty
+        if (display.getLevel() != null && !display.getLevel().isClientSide) {
+            display.getLevel().playLocalSound(display.getBlockPos().getX(), display.getBlockPos().getY(), display.getBlockPos().getZ(),
+                    SoundEvents.ITEM_PICKUP, SoundSource.AMBIENT, 1.0f, 1.0f, false);
+        }
+
+        this.shouldRenderItem = true;
+
         if (outputInventory.getItem(0).isEmpty()) {
             outputInventory.setItem(0, compass);
-            setChanged();
         }
+
+        setChanged();
     }
 
     private static VolumetricDisplayBlockEntity.BeaconData getNearestBeacon(VolumetricDisplayBlockEntity display) {
@@ -149,6 +168,7 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         tag.putInt("NextColorIndex", nextColorIndex);
+        tag.putBoolean("ShouldRenderItem", shouldRenderItem);
         ContainerHelper.saveAllItems(tag, outputInventory.getItems(), registries);
     }
 
@@ -156,6 +176,7 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(tag, registries, clientPacket);
         nextColorIndex = tag.getInt("NextColorIndex");
+        shouldRenderItem = tag.getBoolean("ShouldRenderItem");
         ContainerHelper.loadAllItems(tag, outputInventory.getItems(), registries);
     }
 }

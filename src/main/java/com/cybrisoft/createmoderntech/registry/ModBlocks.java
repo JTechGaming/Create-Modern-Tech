@@ -1,6 +1,8 @@
 package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.block.aicore.AICoreBlock;
+import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockItem;
 import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlock;
 import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockItem;
 import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlock;
@@ -111,7 +113,7 @@ public class ModBlocks {
             REGISTRATE.block("beacon_controller", BeaconControllerBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
-                    .properties(p -> p.strength(0.8f))
+                    .properties(p -> p.noOcclusion().strength(0.8f))
                     .transform(axeOrPickaxe())
                     .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .simpleItem()
@@ -133,7 +135,6 @@ public class ModBlocks {
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
-                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .item(SpeakerBlockItem::new).build()
                     .register();
 
@@ -143,8 +144,16 @@ public class ModBlocks {
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
-                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .item(AudioTriggerBlockItem::new).build()
+                    .register();
+
+    public static final BlockEntry<AICoreBlock> AI_CORE_BLOCK =
+            REGISTRATE.block("ai_core_block", AICoreBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .item(AICoreBlockItem::new).build()
                     .register();
 
     public static final BlockEntry<VerticalLensBlock> LENS_1X = registerLens("lens_1x");
