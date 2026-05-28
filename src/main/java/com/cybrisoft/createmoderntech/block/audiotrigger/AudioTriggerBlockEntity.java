@@ -1,7 +1,9 @@
 package com.cybrisoft.createmoderntech.block.audiotrigger;
 
+import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockEntity;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
 import com.cybrisoft.createmoderntech.network.PlaySpeakerPacket;
+import com.cybrisoft.createmoderntech.util.ServerAINetworkManager;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import dev.ryanhcode.sable.companion.SableCompanion;
@@ -35,9 +37,34 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
     }
 
     @Override
+    public void initialize() {
+        super.initialize();
+
+        if (networkId == null) return;
+        BlockPos corePos = ServerAINetworkManager.getNetworkCorePos(networkId);
+        if (corePos == null || getLevel() == null) return;
+        if (getLevel().getBlockEntity(corePos) instanceof AICoreBlockEntity be) {
+            be.registerDevicePosition(getBlockPos());
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if (networkId == null) return;
+        BlockPos corePos = ServerAINetworkManager.getNetworkCorePos(networkId);
+        if (corePos == null || getLevel() == null) return;
+        if (getLevel().getBlockEntity(corePos) instanceof AICoreBlockEntity be) {
+            be.unregisterDevicePosition(getBlockPos());
+        }
+    }
+
+    @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
 
+    boolean registered = false;
+
     public void tick() {
+        tryRegister();
         if (level == null || level.isClientSide()) return;
 
         boolean isPowered = level.hasNeighborSignal(worldPosition);
@@ -47,25 +74,29 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
         wasPowered = isPowered;
     }
 
+    private void tryRegister() {
+        if (registered || networkId == null || getLevel() == null || getLevel().isClientSide()) return;
+        BlockPos corePos = ServerAINetworkManager.getNetworkCorePos(networkId);
+        if (corePos == null) return;
+        if (getLevel().getBlockEntity(corePos) instanceof AICoreBlockEntity be) {
+            be.registerDevicePosition(getBlockPos());
+            registered = true;
+        }
+    }
+
     private void trigger() {
         if (networkId == null || message.isBlank()) return;
 
         List<BlockPos> speakerPositions = new ArrayList<>();
         ServerLevel serverLevel = (ServerLevel) level;
 
-        int searchRadius = 4; // chunks
-        int centerCX = worldPosition.getX() >> 4;
-        int centerCZ = worldPosition.getZ() >> 4;
-
-        for (int cx = centerCX - searchRadius; cx <= centerCX + searchRadius; cx++) {
-            for (int cz = centerCZ - searchRadius; cz <= centerCZ + searchRadius; cz++) {
-                if (!serverLevel.isLoaded(new BlockPos(cx << 4, 0, cz << 4))) continue;
-                LevelChunk chunk = serverLevel.getChunk(cx, cz);
-                for (Map.Entry<BlockPos, BlockEntity> entry : chunk.getBlockEntities().entrySet()) {
-                    if (entry.getValue() instanceof SpeakerBlockEntity speaker
-                            && networkId.equals(speaker.networkId)) {
-                        speakerPositions.add(entry.getKey());
-                    }
+        BlockPos corePos = ServerAINetworkManager.getNetworkCorePos(networkId);
+        if (corePos == null) return;
+        if (serverLevel == null) return;
+        if (serverLevel.getBlockEntity(corePos) instanceof AICoreBlockEntity be) {
+            for (BlockPos pos : be.getConnectedDevices()) {
+                if (serverLevel.getBlockEntity(pos) instanceof SpeakerBlockEntity) {
+                    speakerPositions.add(pos);
                 }
             }
         }

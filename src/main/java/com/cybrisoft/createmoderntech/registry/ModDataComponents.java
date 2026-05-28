@@ -2,12 +2,10 @@ package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
 import com.cybrisoft.createmoderntech.item.BeaconCompassData;
-import com.mojang.serialization.Codec;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
@@ -24,8 +22,8 @@ public class ModDataComponents {
                     .networkSynchronized(BeaconCompassData.STREAM_CODEC)
                     .build());
 
-    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> SPEAKER_NETWORK_ID =
-            REGISTER.register("speaker_network_id", () -> DataComponentType.<UUID>builder()
+    public static final DeferredHolder<DataComponentType<?>, DataComponentType<UUID>> AI_NETWORK_ID =
+            REGISTER.register("ai_network_id", () -> DataComponentType.<UUID>builder()
                     .persistent(UUIDUtil.CODEC)
                     .networkSynchronized(UUIDUtil.STREAM_CODEC)
                     .build());

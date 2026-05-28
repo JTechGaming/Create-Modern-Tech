@@ -684,7 +684,7 @@ public class PonderScenes {
         });
 
         createScene.world().instructArm(armPos, ArmBlockEntity.Phase.MOVE_TO_INPUT, ItemStack.EMPTY, 1);
-        scene.idle(24);
+        driveArmProgress(scene, armPos, 24);
 
         scene.addInstruction(s ->
                 s.getWorld().getBlockEntity(new BlockPos(0, 1, 3),
@@ -692,9 +692,9 @@ public class PonderScenes {
                         be.outputInventory.setItem(0, ItemStack.EMPTY)));
 
         createScene.world().instructArm(armPos, ArmBlockEntity.Phase.SEARCH_OUTPUTS, compass, -1);
-        scene.idle(20);
+        driveArmProgress(scene, armPos, 20);
         createScene.world().instructArm(armPos, ArmBlockEntity.Phase.MOVE_TO_OUTPUT, compass, 1);
-        scene.idle(24);
+        driveArmProgress(scene, armPos, 24);
 
         scene.addInstruction(s ->
                 s.getWorld().getBlockEntity(new BlockPos(2, 0, 1),
@@ -709,5 +709,23 @@ public class PonderScenes {
                 .pointAt(util.vector().topOf(2, 1, 2))
                 .attachKeyFrame();
         scene.idle(60);
+    }
+
+    private static void driveArmProgress(SceneBuilder scene, BlockPos armPos, int ticks) {
+        for (int i = 0; i <= ticks; i++) {
+            final float progress = i / (float) ticks;
+            scene.addInstruction(s -> {
+                if (s.getWorld().getBlockEntity(armPos) instanceof ArmBlockEntity be) {
+                    try {
+                        var field = ArmBlockEntity.class.getDeclaredField("chasedPointProgress");
+                        field.setAccessible(true);
+                        field.set(be, progress);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            scene.idle(1);
+        }
     }
 }

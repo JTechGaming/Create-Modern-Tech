@@ -1,5 +1,7 @@
 package com.cybrisoft.createmoderntech.block.speaker;
 
+import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockEntity;
+import com.cybrisoft.createmoderntech.util.ServerAINetworkManager;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import net.minecraft.core.BlockPos;
@@ -18,7 +20,44 @@ public class SpeakerBlockEntity extends SmartBlockEntity {
     public SpeakerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
     }
-    
+
+    @Override
+    public void initialize() {
+        super.initialize();
+
+        if (networkId == null) return;
+        BlockPos corePos = ServerAINetworkManager.getNetworkCorePos(networkId);
+        if (corePos == null || getLevel() == null) return;
+        if (getLevel().getBlockEntity(corePos) instanceof AICoreBlockEntity be) {
+            be.registerDevicePosition(getBlockPos());
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if (networkId == null) return;
+        BlockPos corePos = ServerAINetworkManager.getNetworkCorePos(networkId);
+        if (corePos == null || getLevel() == null) return;
+        if (getLevel().getBlockEntity(corePos) instanceof AICoreBlockEntity be) {
+            be.unregisterDevicePosition(getBlockPos());
+        }
+    }
+
+    boolean registered = false;
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (registered || networkId == null || getLevel() == null || getLevel().isClientSide()) return;
+        BlockPos corePos = ServerAINetworkManager.getNetworkCorePos(networkId);
+        if (corePos == null) return;
+        if (getLevel().getBlockEntity(corePos) instanceof AICoreBlockEntity be) {
+            be.registerDevicePosition(getBlockPos());
+            registered = true;
+        }
+    }
+
     @Override
     public void addBehaviours(List<BlockEntityBehaviour> behaviours) {}
 

@@ -1,5 +1,7 @@
 package com.cybrisoft.createmoderntech.block.speaker;
 
+import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockItem;
+import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockItem;
 import com.cybrisoft.createmoderntech.registry.ModBlockEntityTypes;
 import com.cybrisoft.createmoderntech.registry.ModDataComponents;
 import com.simibubi.create.foundation.block.IBE;
@@ -19,7 +21,6 @@ import net.neoforged.neoforge.common.property.Properties;
 import java.util.UUID;
 
 public class SpeakerBlock extends Block implements IBE<SpeakerBlockEntity> {
-
     public SpeakerBlock(Properties properties) {
         super(properties);
     }
@@ -31,24 +32,15 @@ public class SpeakerBlock extends Block implements IBE<SpeakerBlockEntity> {
         return onBlockEntityUse(level, pos, be -> {
             ItemStack held = player.getMainHandItem();
 
-            // right-clicking with a speaker item
-            if (held.getItem() instanceof SpeakerBlockItem) {
-                UUID heldId = held.get(ModDataComponents.SPEAKER_NETWORK_ID.get());
-
-                if (heldId != null) {
-                    // item already has a UUID so link this placed block to it
-                    be.networkId = heldId;
-                    be.setChanged();
-                    player.displayClientMessage(
-                            Component.literal("Speaker linked to network"), true);
+            if (held.getItem() instanceof AICoreBlockItem) {
+                if (held.has(ModDataComponents.AI_NETWORK_ID.get())) {
+                    be.networkId = held.get(ModDataComponents.AI_NETWORK_ID.get());
                 } else {
-                    // item has no UUID so copy this block's UUID to the item
-                    if (be.networkId == null) be.networkId = UUID.randomUUID();
-                    held.set(ModDataComponents.SPEAKER_NETWORK_ID.get(), be.networkId);
-                    be.setChanged();
-                    player.displayClientMessage(
-                            Component.literal("Network ID copied to item"), true);
+                    be.networkId = UUID.randomUUID();
+                    held.set(ModDataComponents.AI_NETWORK_ID.get(), be.networkId);
                 }
+                be.setChanged();
+                player.displayClientMessage(Component.literal("Network ID copied to item"), true);
                 return InteractionResult.SUCCESS;
             }
 

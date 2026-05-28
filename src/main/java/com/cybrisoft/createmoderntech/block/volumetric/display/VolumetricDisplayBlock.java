@@ -55,12 +55,7 @@ public class VolumetricDisplayBlock extends DirectionalKineticBlock implements I
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context) {
-        boolean crouching = context.getPlayer() != null && context.getPlayer().isCrouching();
-
-        Direction vertical = context.getPlayer() != null && context.getPlayer().getXRot() > 0
-                ? Direction.UP : Direction.DOWN ;
-
-        return defaultBlockState().setValue(FACING, crouching ? vertical : vertical.getOpposite());
+        return defaultBlockState().setValue(FACING, Direction.DOWN);
     }
 
     @Override

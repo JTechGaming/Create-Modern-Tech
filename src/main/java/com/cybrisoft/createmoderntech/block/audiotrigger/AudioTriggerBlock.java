@@ -1,5 +1,6 @@
 package com.cybrisoft.createmoderntech.block.audiotrigger;
 
+import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockItem;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockItem;
 import com.cybrisoft.createmoderntech.network.OpenAudioTriggerScreenPacket;
 import com.cybrisoft.createmoderntech.registry.ModBlockEntityTypes;
@@ -36,25 +37,20 @@ public class AudioTriggerBlock extends Block implements IBE<AudioTriggerBlockEnt
         return onBlockEntityUse(level, pos, be -> {
             ItemStack held = player.getMainHandItem();
 
-            // linking with a speaker item
-            if (held.getItem() instanceof SpeakerBlockItem) {
-                UUID heldId = held.get(ModDataComponents.SPEAKER_NETWORK_ID.get());
-                if (heldId != null) {
-                    be.networkId = heldId;
-                    be.setChanged();
-                    player.displayClientMessage(
-                            Component.literal("Trigger linked to speaker network"), true);
-                    return InteractionResult.SUCCESS;
+            if (held.getItem() instanceof AICoreBlockItem) {
+                if (held.has(ModDataComponents.AI_NETWORK_ID.get())) {
+                    be.networkId = held.get(ModDataComponents.AI_NETWORK_ID.get());
+                } else {
+                    be.networkId = UUID.randomUUID();
+                    held.set(ModDataComponents.AI_NETWORK_ID.get(), be.networkId);
                 }
-            }
-
-            // open GUI if holding nothing
-            if (held.isEmpty()) {
-                PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenAudioTriggerScreenPacket(pos, be.message));
+                be.setChanged();
+                player.displayClientMessage(Component.literal("Network ID copied to item"), true);
                 return InteractionResult.SUCCESS;
             }
 
-            return InteractionResult.PASS;
+            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenAudioTriggerScreenPacket(pos, be.message));
+            return InteractionResult.SUCCESS;
         });
     }
 

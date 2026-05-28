@@ -42,7 +42,6 @@ public class ModBlocks {
                     .properties(p -> p.noOcclusion())
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
-                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .transform(ModernTechStress.setImpact(4.0))
                     .simpleItem()
                     .register();

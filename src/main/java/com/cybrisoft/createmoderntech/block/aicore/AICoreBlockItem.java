@@ -1,6 +1,6 @@
 package com.cybrisoft.createmoderntech.block.aicore;
 
-import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
+import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockEntity;
 import com.cybrisoft.createmoderntech.registry.ModDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionResult;
@@ -20,8 +20,8 @@ public class AICoreBlockItem extends BlockItem {
         InteractionResult result = super.place(context);
         if (result.consumesAction() && !context.getLevel().isClientSide()) {
             BlockPos pos = context.getClickedPos();
-            UUID id = context.getItemInHand().get(ModDataComponents.SPEAKER_NETWORK_ID.get());
-            if (id != null && context.getLevel().getBlockEntity(pos) instanceof SpeakerBlockEntity be) {
+            UUID id = context.getItemInHand().get(ModDataComponents.AI_NETWORK_ID.get());
+            if (id != null && context.getLevel().getBlockEntity(pos) instanceof AICoreBlockEntity be) {
                 be.networkId = id;
                 be.setChanged();
             }
