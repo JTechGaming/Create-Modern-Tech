@@ -7,6 +7,8 @@ import io.github.jonelo.jAdapterForNativeTTS.engines.VoicePreferences;
 import io.github.jonelo.jAdapterForNativeTTS.engines.exceptions.SpeechEngineCreationException;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.lwjgl.openal.AL10;
 import org.lwjgl.system.MemoryUtil;
 
@@ -17,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@OnlyIn(Dist.CLIENT)
 public class FreeTTSEngine {
     private static Voice voice;
     private static boolean initialized = false;
@@ -57,6 +60,7 @@ public class FreeTTSEngine {
     }
 
     public static void speak(String text, Vec3 position, float range) {
+        if (!Minecraft.getInstance().isSameThread()) return;
         TTS_EXECUTOR.submit(() -> {
             try {
                 speechEngine.setVoice(voice.getName());
