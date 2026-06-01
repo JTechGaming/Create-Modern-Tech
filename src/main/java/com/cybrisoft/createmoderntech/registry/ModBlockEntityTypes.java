@@ -1,15 +1,22 @@
 package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockEntity;
+import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockEntity;
+import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlockEntity;
+import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
+import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanXControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanZControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.rotation.PitchControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.rotation.YawControllerBlockEntity;
+import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerRenderer;
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayRenderer;
 import com.cybrisoft.createmoderntech.block.volumetric.shaft.VolumetricShaftBlockEntity;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
+import com.simibubi.create.content.kinetics.base.ShaftRenderer;
 import com.simibubi.create.content.kinetics.base.ShaftVisual;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 
@@ -48,6 +55,33 @@ public class ModBlockEntityTypes {
             .blockEntity("pitch_controller", PitchControllerBlockEntity::new)
             .visual(() -> ShaftVisual::new)
             .validBlocks(ModBlocks.PITCH_CONTROLLER_BLOCK)
+            .register();
+    public static final BlockEntityEntry<BeaconControllerBlockEntity> BEACON_CONTROLLER = REGISTRATE
+            .blockEntity("beacon_controller", BeaconControllerBlockEntity::new)
+            .validBlocks(ModBlocks.BEACON_CONTROLLER_BLOCK)
+            .renderer(() -> BeaconControllerRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<RegionalStressGaugeBlockEntity> REGIONAL_STRESS_GAUGE = REGISTRATE
+            .blockEntity("regional_stress_gauge", RegionalStressGaugeBlockEntity::new)
+            .visual(() -> OrientedRotatingVisual.of(AllPartialModels.SHAFT_HALF))
+            .renderer(() -> ShaftRenderer::new)
+            .validBlocks(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<SpeakerBlockEntity> SPEAKER = REGISTRATE
+            .blockEntity("speaker", SpeakerBlockEntity::new)
+            .validBlocks(ModBlocks.SPEAKER_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<AudioTriggerBlockEntity> AUDIO_TRIGGER = REGISTRATE
+            .blockEntity("audio_trigger", AudioTriggerBlockEntity::new)
+            .validBlocks(ModBlocks.AUDIO_TRIGGER_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<AICoreBlockEntity> AI_CORE_BLOCK = REGISTRATE
+            .blockEntity("ai_core_block", AICoreBlockEntity::new)
+            .validBlocks(ModBlocks.AI_CORE_BLOCK)
             .register();
 
     public static void register() {

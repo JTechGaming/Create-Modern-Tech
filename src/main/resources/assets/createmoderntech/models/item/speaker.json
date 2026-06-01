@@ -1,0 +1,7 @@
+{
+	"parent": "minecraft:block/cube_column",
+	"textures": {
+		"end": "createmoderntech:block/speaker",
+		"side": "createmoderntech:block/speaker"
+	}
+}

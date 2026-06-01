@@ -59,6 +59,7 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.PITCH_CONTROLLER_BLOCK);
         pOutput.accept(ModBlocks.PAN_X_CONTROLLER_BLOCK);
         pOutput.accept(ModBlocks.PAN_Z_CONTROLLER_BLOCK);
+        pOutput.accept(ModBlocks.BEACON_CONTROLLER_BLOCK);
 
         pOutput.accept(ModBlocks.LENS_1X);
         pOutput.accept(ModBlocks.LENS_2X);
@@ -69,9 +70,18 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.TELEPHOTO_EXTENSION);
         pOutput.accept(ModBlocks.LIGHT_BOOST_FILTER);
         pOutput.accept(ModBlocks.LIME_COLOR_FILTER);
-        pOutput.accept(ModBlocks.PURPLE_COLOR_FILTER);
         pOutput.accept(ModBlocks.RED_COLOR_FILTER);
+        pOutput.accept(ModBlocks.PURPLE_COLOR_FILTER);
         pOutput.accept(ModBlocks.WHITE_COLOR_FILTER);
+
+        pOutput.accept(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK);
+
+        pOutput.accept(ModBlocks.SPEAKER_BLOCK);
+        pOutput.accept(ModBlocks.AUDIO_TRIGGER_BLOCK);
+        pOutput.accept(ModBlocks.AI_CORE_BLOCK);
+
+        pOutput.accept(ModItems.BEACON_COMPASS);
+        pOutput.accept(ModItems.AI_CORE);
     }
 
 

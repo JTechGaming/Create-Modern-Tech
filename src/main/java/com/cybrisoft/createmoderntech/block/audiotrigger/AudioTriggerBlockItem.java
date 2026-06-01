@@ -1,0 +1,30 @@
+package com.cybrisoft.createmoderntech.block.audiotrigger;
+
+import com.cybrisoft.createmoderntech.registry.ModDataComponents;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.Block;
+
+import java.util.UUID;
+
+public class AudioTriggerBlockItem extends BlockItem {
+    public AudioTriggerBlockItem(Block block, Properties properties) {
+        super(block, properties);
+    }
+
+    @Override
+    public InteractionResult place(BlockPlaceContext context) {
+        InteractionResult result = super.place(context);
+        if (result.consumesAction() && !context.getLevel().isClientSide()) {
+            BlockPos pos = context.getClickedPos();
+            UUID id = context.getItemInHand().get(ModDataComponents.AI_NETWORK_ID.get());
+            if (id != null && context.getLevel().getBlockEntity(pos) instanceof AudioTriggerBlockEntity be) {
+                be.networkId = id;
+                be.setChanged();
+            }
+        }
+        return result;
+    }
+}

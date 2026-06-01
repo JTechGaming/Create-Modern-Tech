@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.state.BlockState;
 
 public abstract class VolumetricControllerBlockEntity extends KineticBlockEntity {
     protected float accumulatedValue = 0f;
-    private BlockPos shaftPos = null;
+    protected BlockPos shaftPos = null;
     protected float sensitivity = 0.01f;// How many units per RPM per tick
 
     public VolumetricControllerBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {

@@ -78,8 +78,10 @@ neoForge {
     runs {
         client {
             client()
-
-            // Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+            jvmArguments.addAll(
+                    '--add-opens=java.base/java.lang=ALL-UNNAMED',
+                    '--add-opens=java.base/java.util=ALL-UNNAMED'
+            )
             systemProperty 'neoforge.enabledGameTestNamespaces', project.mod_id
         }
 
@@ -177,6 +179,34 @@ dependencies {
     }
 
     jarJar(api("dev.ryanhcode.sable-companion:sable-companion-common-${minecraft_version}:${sable_companion_version}"))
+
+    implementation files('libs/jadapter-for-native-tts-fixed.jar')
+}
+
+tasks.named('processResources') {
+    dependsOn extractFreeTTS
+}
+
+tasks.named('classes') {
+    dependsOn extractFreeTTS
+}
+
+tasks.register('extractFreeTTS', Copy) {
+    from {
+        fileTree('libs').filter {
+            it.name.contains('freetts') ||
+                    it.name.contains('cmu') ||
+                    it.name.contains('en_us') ||
+                    it.name.contains('jadapter')
+        }.collect { zipTree(it) }
+    }
+    into layout.buildDirectory.dir('classes/java/main')
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    exclude 'META-INF/**'
+}
+
+tasks.named('compileJava') {
+    dependsOn extractFreeTTS
 }
 
 // This block of code expands all declared replace properties in the specified resource targets.
@@ -197,6 +227,15 @@ var generateModMetadata = tasks.register("generateModMetadata", ProcessResources
     expand replaceProperties
     from "src/main/templates"
     into "build/generated/sources/modMetadata"
+}
+
+tasks.register('fixJAdapterManifest', Jar) {
+    from zipTree(file('libs/jadapter-for-native-tts-0.12.0.jar'))
+    manifest {
+        attributes 'Automatic-Module-Name': 'io.github.jonelo.jadapternativetts'
+    }
+    archiveFileName = 'jadapter-for-native-tts-fixed.jar'
+    destinationDirectory = file('libs')
 }
 
 // Include the output of "generateModMetadata" as an input directory for the build
