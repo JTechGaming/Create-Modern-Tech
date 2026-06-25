@@ -1,6 +1,7 @@
 package com.cybrisoft.createmoderntech.block.volumetric.display;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.client.ClientPacketHandlers;
 import com.cybrisoft.createmoderntech.registry.ModBlocks;
 import com.cybrisoft.createmoderntech.registry.ModPackets;
 import com.cybrisoft.createmoderntech.util.ChunkCache;
@@ -23,13 +24,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+@OnlyIn(Dist.CLIENT)
 public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<VolumetricDisplayBlockEntity> {
     // Maximum chunk radius (16 = 32 chunk diameter)
     private static final int MAX_CHUNK_RADIUS = 16;
@@ -134,7 +139,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
 
         // Request missing chunks using ceil radius
         if (blockEntity.chunkRequestDirty) {
-            ModPackets.requestMissingChunks(blockEntity, sampleCenter, sampleRadius);
+            ClientPacketHandlers.requestMissingChunks(blockEntity, sampleCenter, sampleRadius);
             blockEntity.chunkRequestDirty = false;
         }
 
@@ -286,7 +291,11 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                 blockEntity.lastCenterPos = blockEntity.bakingIntCenter;
             }
             if (blockEntity.pendingVoxels != null) {
-                blockEntity.chunkCache.swapVoxels(blockEntity.pendingVoxels);
+                if (blockEntity.chunkCache == null) {
+                    blockEntity.chunkCache = new ChunkCache();
+                }
+                ChunkCache cache = (ChunkCache) blockEntity.chunkCache;
+                cache.swapVoxels((List<ChunkCache.VoxelData>) blockEntity.pendingVoxels);
                 blockEntity.pendingVoxels = null;
             }
             blockEntity.rebuildFuture = null;
@@ -307,9 +316,13 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             }
 
             blockEntity.rebuildFuture = CompletableFuture.runAsync(() -> {
-                blockEntity.chunkCache.update(worldLevel, capIntCenter, capSampleRadius, blockEntity.heightmapCache);
+                if (blockEntity.chunkCache == null) {
+                    blockEntity.chunkCache = new ChunkCache();
+                }
+                ChunkCache cache = (ChunkCache) blockEntity.chunkCache;
+                cache.update(worldLevel, capIntCenter, capSampleRadius, blockEntity.heightmapCache);
 
-                List<ChunkCache.VoxelData> snapshot = blockEntity.chunkCache.snapshotVoxels();
+                List<ChunkCache.VoxelData> snapshot = cache.snapshotVoxels();
 
                 if (blockEntity.sharedByteBuffer == null) {
                     blockEntity.sharedByteBuffer = new ByteBufferBuilder(8 * 1024 * 1024);
@@ -366,7 +379,11 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         float scale = magnification * pulse;
         float scaledScan = scanPos * VOXEL_SIZE * 50f;
 
-        for (ChunkCache.VoxelData voxel : blockEntity.chunkCache.getVoxels()) {
+        if (blockEntity.chunkCache == null) {
+            blockEntity.chunkCache = new ChunkCache();
+        }
+        ChunkCache cache = (ChunkCache) blockEntity.chunkCache;
+        for (ChunkCache.VoxelData voxel : cache.getVoxels()) {
             float relX = (voxel.x - sampleCenter.x());
             float relY = (voxel.y - sampleCenter.y());
             float relZ = (voxel.z - sampleCenter.z());

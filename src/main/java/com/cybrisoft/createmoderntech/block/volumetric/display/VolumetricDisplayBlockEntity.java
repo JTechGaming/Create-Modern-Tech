@@ -13,6 +13,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +49,8 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
     float[] cachedColor = null;
 
     // --- Chunk cache state ---
-    final ChunkCache chunkCache = new ChunkCache();
+    Object chunkCache = null;
+
     public long lastCacheUpdate = 0;
     BlockPos lastCenterPos = null;
     public BlockPos pendingIntCenter;
@@ -61,7 +64,10 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
 
     // --- Async rebuild state ---
     volatile MeshData pendingMesh = null;
-    volatile List<ChunkCache.VoxelData> pendingVoxels = null;
+
+    //volatile List<ChunkCache.VoxelData> pendingVoxels = null;
+    public volatile Object pendingVoxels = null;
+
     CompletableFuture<Void> rebuildFuture = null;
 
     public VolumetricDisplayBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {

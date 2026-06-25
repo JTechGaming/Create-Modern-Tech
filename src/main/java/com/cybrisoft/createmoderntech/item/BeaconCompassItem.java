@@ -1,10 +1,10 @@
 package com.cybrisoft.createmoderntech.item;
 
+import com.cybrisoft.createmoderntech.client.ClientCompassHelper;
 import com.cybrisoft.createmoderntech.registry.ModDataComponents;
 import dev.ryanhcode.sable.companion.SableCompanion;
 import dev.ryanhcode.sable.companion.SubLevelAccess;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -14,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.fml.loading.FMLEnvironment;
 import org.joml.Quaterniond;
 import org.joml.Quaterniondc;
 import org.joml.Vector3d;
@@ -43,7 +44,10 @@ public class BeaconCompassItem extends Item {
                 .withStyle(ChatFormatting.GRAY));
 
         // client side only distance
-        Player player = Minecraft.getInstance().player;
+        Player player = null;
+        if (FMLEnvironment.dist.isClient()) {
+            player = ClientCompassHelper.getClientPlayer();
+        }
         if (player != null) {
             Vec3 playerPos = getProjectedPlayerPos(player);
             lines.add(Component.literal("Distance: ")

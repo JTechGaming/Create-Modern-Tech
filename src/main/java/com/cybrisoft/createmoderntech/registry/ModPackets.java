@@ -1,29 +1,20 @@
 package com.cybrisoft.createmoderntech.registry;
 
 import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockEntity;
-import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
-import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
+import com.cybrisoft.createmoderntech.client.ClientPacketHandlers;
 import com.cybrisoft.createmoderntech.network.*;
-import com.cybrisoft.createmoderntech.tts.FreeTTSEngine;
-import com.cybrisoft.createmoderntech.ui.AudioTriggerScreen;
-import net.minecraft.client.Minecraft;
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
-import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ModPackets {
@@ -49,27 +40,20 @@ public class ModPackets {
 
         // Server -> Client
         registrar.playToClient(
-                HeightmapDataPacket.TYPE,
-                HeightmapDataPacket.CODEC,
-                ModPackets::handleHeightmapData
-        );
-        registrar.playToClient(
                 OpenAudioTriggerScreenPacket.TYPE,
                 OpenAudioTriggerScreenPacket.CODEC,
-                ModPackets::handleOpenAudioTriggerScreen
+                (packet, ctx) -> ClientPacketHandlers.handleOpenAudioTriggerScreen(packet, ctx)
         );
         registrar.playToClient(
                 PlaySpeakerPacket.TYPE,
                 PlaySpeakerPacket.CODEC,
-                ModPackets::handlePlaySpeaker
+                (packet, ctx) -> ClientPacketHandlers.handlePlaySpeaker(packet, ctx)
         );
-    }
-
-    private static void handleOpenAudioTriggerScreen(OpenAudioTriggerScreenPacket packet,
-                                                     IPayloadContext context) {
-        context.enqueueWork(() ->
-                Minecraft.getInstance().setScreen(
-                        new AudioTriggerScreen(packet.pos(), packet.message())));
+        registrar.playToClient(
+                HeightmapDataPacket.TYPE,
+                HeightmapDataPacket.CODEC,
+                (packet, ctx) -> ClientPacketHandlers.handleHeightmapData(packet, ctx)
+        );
     }
 
     private static void handleUpdateAudioTrigger(UpdateAudioTriggerPacket packet,
@@ -79,31 +63,6 @@ public class ModPackets {
             if (level.getBlockEntity(packet.pos()) instanceof AudioTriggerBlockEntity be) {
                 be.message = packet.message();
                 be.setChanged();
-            }
-        });
-    }
-
-    private static void handlePlaySpeaker(PlaySpeakerPacket packet,
-                                          IPayloadContext context) {
-        context.enqueueWork(() -> {
-            Minecraft mc = Minecraft.getInstance();
-            if (mc.level == null || mc.player == null) return;
-
-            Vec3 playerPos = mc.player.position();
-            boolean played = false;
-
-            for (BlockPos speakerPos : packet.speakerPositions()) {
-                if (mc.level.getBlockEntity(speakerPos) instanceof SpeakerBlockEntity speaker) {
-                    Vec3 pos = Vec3.atCenterOf(speakerPos);
-                    if (pos.distanceTo(playerPos) <= speaker.range) {
-                        FreeTTSEngine.speak(packet.message(), pos, speaker.range);
-                        played = true;
-                    }
-                }
-            }
-
-            if (!played) {
-                FreeTTSEngine.speak(packet.message(), playerPos, 32f);
             }
         });
     }
@@ -145,59 +104,5 @@ public class ModPackets {
                         new HeightmapDataPacket(packet.blockEntityPos(), result));
             }
         });
-    }
-
-    // -------------------------------------------------------------------------
-    // Client-side handler: receive heightmap data, store on block entity
-    // -------------------------------------------------------------------------
-
-    private static void handleHeightmapData(HeightmapDataPacket packet,
-                                            net.neoforged.neoforge.network.handling.IPayloadContext context) {
-        context.enqueueWork(() -> {
-            var mc = net.minecraft.client.Minecraft.getInstance();
-            if (mc.level == null) return;
-
-            if (mc.level.getBlockEntity(packet.blockEntityPos()) instanceof VolumetricDisplayBlockEntity be) {
-                be.heightmapCache.putAll(packet.heightmaps());
-                be.vboDirty = true;
-                be.lastCacheUpdate = 0;
-            }
-        });
-    }
-
-    // -------------------------------------------------------------------------
-    // Helper: pack chunk coords the same way on both sides
-    // -------------------------------------------------------------------------
-
-    public static long packChunkPos(int cx, int cz) {
-        return ((long) cz << 32) | (cx & 0xFFFFFFFFL);
-    }
-
-    // -------------------------------------------------------------------------
-    // Client-side: request chunks not already cached
-    // -------------------------------------------------------------------------
-
-    public static void requestMissingChunks(VolumetricDisplayBlockEntity be,
-                                            BlockPos sampleCenter, int chunkRadius) {
-        int centerCX = sampleCenter.getX() >> 4;
-        int centerCZ = sampleCenter.getZ() >> 4;
-
-        List<Long> toRequest = new ArrayList<>();
-
-        for (int dx = -chunkRadius; dx <= chunkRadius; dx++) {
-            for (int dz = -chunkRadius; dz <= chunkRadius; dz++) {
-                int cx = centerCX + dx;
-                int cz = centerCZ + dz;
-                long key = packChunkPos(cx, cz);
-
-                if (!be.heightmapCache.containsKey(key)) {
-                    toRequest.add(key);
-                }
-            }
-        }
-
-        if (!toRequest.isEmpty()) {
-            PacketDistributor.sendToServer(new RequestHeightmapPacket(be.getBlockPos(), toRequest));
-        }
     }
 }

@@ -1,10 +1,12 @@
 package com.cybrisoft.createmoderntech.util;
 
-import com.cybrisoft.createmoderntech.registry.ModPackets;
+import com.cybrisoft.createmoderntech.client.ClientPacketHandlers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,7 @@ public class ChunkCache {
                         int worldX = (worldChunkX << 4) + lx;
                         int worldZ = (worldChunkZ << 4) + lz;
 
-                        long key = ModPackets.packChunkPos(worldChunkX, worldChunkZ);
+                        long key = ClientPacketHandlers.packChunkPos(worldChunkX, worldChunkZ);
                         short[] heights = fallback.get(key);
 
                         int worldY;
@@ -75,7 +77,7 @@ public class ChunkCache {
                 }
 
                 boolean hasData = level.hasChunk(worldChunkX, worldChunkZ) ||
-                        fallback.containsKey(ModPackets.packChunkPos(worldChunkX, worldChunkZ));
+                        fallback.containsKey(ClientPacketHandlers.packChunkPos(worldChunkX, worldChunkZ));
                 if (!hasData) {
                     newVoxels.add(new VoxelData(
                             (worldChunkX << 4) + 8, 63, (worldChunkZ << 4) + 8, 0,
