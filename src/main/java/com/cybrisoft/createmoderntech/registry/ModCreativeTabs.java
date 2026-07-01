@@ -64,7 +64,7 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.LENS_1X);
         pOutput.accept(ModBlocks.LENS_2X);
         pOutput.accept(ModBlocks.LENS_4X);
-        pOutput.accept(ModBlocks.LENS_10X);
+        pOutput.accept(ModBlocks.LENS_8X);
         pOutput.accept(ModBlocks.LENS_16X);
         pOutput.accept(ModBlocks.LENS_EXTENSION);
         pOutput.accept(ModBlocks.TELEPHOTO_EXTENSION);
@@ -82,6 +82,10 @@ public class ModCreativeTabs {
 
         pOutput.accept(ModItems.BEACON_COMPASS);
         pOutput.accept(ModItems.AI_CORE);
+        pOutput.accept(ModItems.LENS_ELEMENT);
+        pOutput.accept(ModItems.OPTICAL_DRIVE);
+        pOutput.accept(ModItems.DIAPHRAGM);
+        pOutput.accept(ModItems.MEMBRANE);
     }
 
 

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "P": { "item": "create:pulp" },
+    "S": { "item": "create:iron_sheet" }
+  },
+  "pattern": [
+    "P",
+    "S"
+  ],
+  "result": { "id": "createmoderntech:membrane" },
+  "show_notification": true
+}

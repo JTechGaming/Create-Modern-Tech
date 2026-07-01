@@ -4,7 +4,7 @@
 	"texture_size": [32, 32],
 	"textures": {
 		"0": "createmoderntech:block/lens",
-		"1": "createmoderntech:block/lens_10x",
+		"1": "createmoderntech:block/lens_8x",
 		"particle": "create:block/chute"
 	},
 	"elements": [

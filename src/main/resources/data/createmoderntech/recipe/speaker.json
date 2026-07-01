@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "T": { "item": "create:transmitter" },
+    "M": { "item": "createmoderntech:membrane" },
+    "C": { "item": "create:brass_ingot" }
+  },
+  "pattern": [
+    "CTC",
+    "CMC",
+    "CTC"
+  ],
+  "result": { "id": "createmoderntech:speaker" },
+  "show_notification": true
+}

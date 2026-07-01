@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "E": { "item": "createmoderntech:lens_extension" },
+    "T": { "item": "create:electron_tube" }
+  },
+  "pattern": [
+    "T",
+    "E"
+  ],
+  "result": { "id": "createmoderntech:light_boost_filter" },
+  "show_notification": true
+}

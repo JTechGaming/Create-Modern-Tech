@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "E": { "item": "createmoderntech:lens_extension" },
+    "D": { "item": "minecraft:lime_dye" }
+  },
+  "pattern": [
+    "D",
+    "E"
+  ],
+  "result": { "id": "createmoderntech:lime_color_filter" },
+  "show_notification": true
+}

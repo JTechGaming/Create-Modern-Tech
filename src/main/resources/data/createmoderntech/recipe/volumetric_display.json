@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "O": { "item": "createmoderntech:optical_drive" },
+    "B": { "item": "create:brass_casing" },
+    "C": { "item": "create:cogwheel" },
+    "D": { "item": "createmoderntech:diaphragm"},
+    "E": { "item": "create:electron_tube" }
+  },
+  "pattern": [
+    "BDB",
+    "OCO",
+    "BEB"
+  ],
+  "result": { "id": "createmoderntech:volumetric_display" },
+  "show_notification": true
+}

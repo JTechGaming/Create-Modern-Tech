@@ -15,6 +15,18 @@ public class ModItems {
     public static final ItemEntry<Item> AI_CORE =
             REGISTRATE.item("ai_core", Item::new)
                     .register();
+    public static final ItemEntry<Item> LENS_ELEMENT =
+            REGISTRATE.item("lens_element", Item::new)
+                    .register();
+    public static final ItemEntry<Item> OPTICAL_DRIVE =
+            REGISTRATE.item("optical_drive", Item::new)
+                    .register();
+    public static final ItemEntry<Item> DIAPHRAGM =
+            REGISTRATE.item("diaphragm", Item::new)
+                    .register();
+    public static final ItemEntry<Item> MEMBRANE =
+            REGISTRATE.item("membrane", Item::new)
+                    .register();
 
     public static void register() {
         CreateModernTech.getLogger().info("Registering Items!");

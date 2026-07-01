@@ -128,7 +128,7 @@ public class PonderScenes {
         scene.idle(20);
         scene.world().setBlock(new BlockPos(2, 4, 2), ModBlocks.LENS_4X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.DOWN), false);
         scene.idle(20);
-        scene.world().setBlock(new BlockPos(2, 4, 2), ModBlocks.LENS_10X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.DOWN), false);
+        scene.world().setBlock(new BlockPos(2, 4, 2), ModBlocks.LENS_8X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.DOWN), false);
         scene.idle(20);
         scene.world().setBlock(new BlockPos(2, 4, 2), ModBlocks.LENS_16X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.DOWN), false);
         scene.idle(20);
@@ -143,7 +143,7 @@ public class PonderScenes {
         scene.idle(20);
         scene.world().setBlock(new BlockPos(2, 7, 2), ModBlocks.LENS_4X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.UP), false);
         scene.idle(20);
-        scene.world().setBlock(new BlockPos(2, 7, 2), ModBlocks.LENS_10X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.UP), false);
+        scene.world().setBlock(new BlockPos(2, 7, 2), ModBlocks.LENS_8X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.UP), false);
         scene.idle(20);
         scene.world().setBlock(new BlockPos(2, 7, 2), ModBlocks.LENS_16X.getDefaultState().setValue(BlockStateProperties.FACING, Direction.UP), false);
         scene.idle(20);

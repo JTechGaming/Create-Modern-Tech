@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "S": { "item": "create:sturdy_sheet" },
+    "P": { "item": "create:precision_mechanism" },
+    "T": { "item": "create:transmitter" }
+  },
+  "pattern": [
+    "SPS",
+    "PTP",
+    "SPS"
+  ],
+  "result": { "id": "createmoderntech:ai_core" },
+  "show_notification": true
+}

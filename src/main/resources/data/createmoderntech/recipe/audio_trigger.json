@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "T": { "item": "create:transmitter" },
+    "B": { "tag": "minecraft:buttons" },
+    "P": { "item": "create:precision_mechanism" },
+    "C": { "item": "create:brass_ingot" }
+  },
+  "pattern": [
+    "CTC",
+    "BPB",
+    "CTC"
+  ],
+  "result": { "id": "createmoderntech:audio_trigger" },
+  "show_notification": true
+}

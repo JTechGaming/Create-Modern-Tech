@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": { "item": "create:brass_casing" },
+    "C": { "item": "create:cogwheel" },
+    "P": { "item": "create:precision_mechanism" }
+  },
+  "pattern": [
+    "BCB",
+    "BPB",
+    "BCB"
+  ],
+  "result": { "id": "createmoderntech:yaw_controller" },
+  "show_notification": true
+}

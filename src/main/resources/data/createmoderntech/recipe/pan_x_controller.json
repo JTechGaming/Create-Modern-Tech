@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": { "item": "create:brass_casing" },
+    "S": { "item": "create:shaft" },
+    "P": { "item": "create:precision_mechanism" }
+  },
+  "pattern": [
+    "CCC",
+    "SPS",
+    "CCC"
+  ],
+  "result": { "id": "createmoderntech:pan_x_controller" },
+  "show_notification": true
+}

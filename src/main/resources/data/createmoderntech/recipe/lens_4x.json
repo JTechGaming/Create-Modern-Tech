@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "P": { "item": "createmoderntech:lens_2x" },
+    "L": { "item": "createmoderntech:lens_element" }
+  },
+  "pattern": [
+    "L",
+    "P"
+  ],
+  "result": { "id": "createmoderntech:lens_4x" },
+  "show_notification": true
+}

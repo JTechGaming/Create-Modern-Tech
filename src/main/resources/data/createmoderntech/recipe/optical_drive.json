@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "A": { "item": "createmoderntech:lens_element" },
+    "P": { "item": "create:precision_mechanism" },
+    "B": { "item": "create:brass_ingot" }
+  },
+  "pattern": [
+    " B ",
+    "PAP",
+    " B "
+  ],
+  "result": { "id": "createmoderntech:optical_drive" },
+  "show_notification": true
+}

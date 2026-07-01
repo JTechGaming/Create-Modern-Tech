@@ -158,7 +158,7 @@ public class ModBlocks {
     public static final BlockEntry<VerticalLensBlock> LENS_1X = registerLens("lens_1x");
     public static final BlockEntry<VerticalLensBlock> LENS_2X = registerLens("lens_2x");
     public static final BlockEntry<VerticalLensBlock> LENS_4X = registerLens("lens_4x");
-    public static final BlockEntry<VerticalLensBlock> LENS_10X = registerLens("lens_10x");
+    public static final BlockEntry<VerticalLensBlock> LENS_8X = registerLens("lens_8x");
     public static final BlockEntry<VerticalLensBlock> LENS_16X = registerLens("lens_16x");
     public static final BlockEntry<VerticalLensExtensionBlock> LENS_EXTENSION = registerExtension("lens_extension");
     public static final BlockEntry<VerticalLensExtensionBlock> TELEPHOTO_EXTENSION = registerExtension("telephoto_extension");

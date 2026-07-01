@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "B": { "item": "create:brass_casing" },
+    "C": { "item": "create:cogwheel" },
+    "P": { "item": "create:precision_mechanism" }
+  },
+  "pattern": [
+    "BBB",
+    "CPC",
+    "BBB"
+  ],
+  "result": { "id": "createmoderntech:pitch_controller" },
+  "show_notification": true
+}

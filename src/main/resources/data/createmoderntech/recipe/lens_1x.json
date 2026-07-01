@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "S": { "item": "create:sturdy_sheet" },
+    "L": { "item": "createmoderntech:lens_element" },
+    "G": { "item": "minecraft:glass_pane" }
+  },
+  "pattern": [
+    " G ",
+    "SLS",
+    "SGS"
+  ],
+  "result": { "id": "createmoderntech:lens_1x" },
+  "show_notification": true
+}

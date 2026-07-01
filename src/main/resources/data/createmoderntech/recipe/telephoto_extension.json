@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "E": { "item": "createmoderntech:lens_extension" },
+    "L": { "item": "createmoderntech:lens_element" }
+  },
+  "pattern": [
+    "L",
+    "E"
+  ],
+  "result": { "id": "createmoderntech:telephoto_extension" },
+  "show_notification": true
+}

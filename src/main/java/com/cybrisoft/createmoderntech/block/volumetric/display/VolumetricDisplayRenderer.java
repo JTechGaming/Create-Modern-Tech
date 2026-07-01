@@ -184,7 +184,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             if (aboveBlockState.is(ModBlocks.LENS_1X.get()))       bottomMagLevel = 1;
             else if (aboveBlockState.is(ModBlocks.LENS_2X.get()))  bottomMagLevel = 2;
             else if (aboveBlockState.is(ModBlocks.LENS_4X.get()))  bottomMagLevel = 4;
-            else if (aboveBlockState.is(ModBlocks.LENS_10X.get())) bottomMagLevel = 10;
+            else if (aboveBlockState.is(ModBlocks.LENS_8X.get()))  bottomMagLevel = 8;
             else if (aboveBlockState.is(ModBlocks.LENS_16X.get())) bottomMagLevel = 16;
             offset++;
         }
@@ -206,7 +206,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                 if (aboveBlockState.is(ModBlocks.LENS_1X.get()))       topMagLevel = 1;
                 else if (aboveBlockState.is(ModBlocks.LENS_2X.get()))  topMagLevel = 2;
                 else if (aboveBlockState.is(ModBlocks.LENS_4X.get()))  topMagLevel = 4;
-                else if (aboveBlockState.is(ModBlocks.LENS_10X.get())) topMagLevel = 10;
+                else if (aboveBlockState.is(ModBlocks.LENS_8X.get()))  topMagLevel = 8;
                 else if (aboveBlockState.is(ModBlocks.LENS_16X.get())) topMagLevel = 16;
                 magnification = (float) topMagLevel / bottomMagLevel;
                 offset++;
@@ -382,7 +382,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         if (blockEntity.chunkCache == null) {
             blockEntity.chunkCache = new ChunkCache();
         }
-        ChunkCache cache = (ChunkCache) blockEntity.chunkCache;
+        ChunkCache cache = (ChunkCache)  blockEntity.chunkCache;
         for (ChunkCache.VoxelData voxel : cache.getVoxels()) {
             float relX = (voxel.x - sampleCenter.x());
             float relY = (voxel.y - sampleCenter.y());
