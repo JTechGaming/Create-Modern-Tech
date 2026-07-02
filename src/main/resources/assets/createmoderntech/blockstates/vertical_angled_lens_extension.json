@@ -1,0 +1,53 @@
+{
+  "variants": {
+    "orientation=down_north": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "x": 180,
+      "y": 180
+    },
+    "orientation=down_east": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "x": 180,
+      "y": 270
+    },
+    "orientation=down_south": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "x": 180
+    },
+    "orientation=down_west": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "x": 180,
+      "y": 90
+    },
+    "orientation=up_north": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension"
+    },
+    "orientation=up_east": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "y": 90
+    },
+    "orientation=up_south": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "y": 180
+    },
+    "orientation=up_west": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "y": 270
+    },
+    "orientation=north_up": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension"
+    },
+    "orientation=east_up": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "y": 90
+    },
+    "orientation=south_up": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "y": 180
+    },
+    "orientation=west_up": {
+      "model": "createmoderntech:block/vertical_angled_lens_extension",
+      "y": 270
+    }
+  }
+}

@@ -2,6 +2,7 @@ package com.cybrisoft.createmoderntech.block.volumetric.controller.beacon;
 
 import com.cybrisoft.createmoderntech.block.volumetric.controller.VolumetricControllerBlock;
 import com.cybrisoft.createmoderntech.registry.ModBlockEntityTypes;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -15,7 +16,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import com.simibubi.create.foundation.block.IBE;
 
-public class BeaconControllerBlock extends VolumetricControllerBlock implements IBE<BeaconControllerBlockEntity> {
+public class BeaconControllerBlock extends VolumetricControllerBlock implements IBE<BeaconControllerBlockEntity>, IWrenchable {
     // set/clear beacon
     public static final BooleanProperty POWERED_TOP = BooleanProperty.create("powered_top");
     // output compass

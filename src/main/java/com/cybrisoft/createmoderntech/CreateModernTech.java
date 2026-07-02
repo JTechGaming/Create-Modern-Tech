@@ -1,6 +1,7 @@
 package com.cybrisoft.createmoderntech;
 
 import com.cybrisoft.createmoderntech.client.BeaconCompassClientEvents;
+import com.cybrisoft.createmoderntech.client.ClientModEvents;
 import com.cybrisoft.createmoderntech.config.ModernTechAllConfigs;
 import com.cybrisoft.createmoderntech.ponder.ModernTechPonderPlugin;
 import com.cybrisoft.createmoderntech.registry.*;

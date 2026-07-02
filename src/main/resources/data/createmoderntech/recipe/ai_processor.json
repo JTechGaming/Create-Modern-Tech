@@ -11,6 +11,6 @@
     "PTP",
     "SPS"
   ],
-  "result": { "id": "createmoderntech:ai_core" },
+  "result": { "id": "createmoderntech:ai_processor" },
   "show_notification": true
 }

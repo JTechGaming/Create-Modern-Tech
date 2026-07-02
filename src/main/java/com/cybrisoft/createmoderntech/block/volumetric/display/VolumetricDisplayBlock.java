@@ -1,11 +1,14 @@
 package com.cybrisoft.createmoderntech.block.volumetric.display;
 
 import com.cybrisoft.createmoderntech.registry.ModBlockEntityTypes;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -16,7 +19,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class VolumetricDisplayBlock extends DirectionalKineticBlock implements IBE<VolumetricDisplayBlockEntity> {
+public class VolumetricDisplayBlock extends DirectionalKineticBlock implements IBE<VolumetricDisplayBlockEntity>, IWrenchable {
     private static final VoxelShape SHAPE = Shapes.or(
             Block.box(0, 0, 0, 16, 1, 3),
             Block.box(0, 0, 13, 16, 1, 16),
@@ -71,5 +74,10 @@ public class VolumetricDisplayBlock extends DirectionalKineticBlock implements I
     @Override
     public BlockEntityType<? extends VolumetricDisplayBlockEntity> getBlockEntityType() {
         return ModBlockEntityTypes.VOLUMETRIC_DISPLAY.get();
+    }
+
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        return InteractionResult.FAIL;
     }
 }

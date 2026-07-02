@@ -1,12 +1,17 @@
 package com.cybrisoft.createmoderntech.block.volumetric.display;
 
 import com.cybrisoft.createmoderntech.CreateModernTech;
+import com.cybrisoft.createmoderntech.block.lens.AngledLensExtensionBlock;
+import com.cybrisoft.createmoderntech.block.lens.LensExtensionBlock;
+import com.cybrisoft.createmoderntech.block.lens.VerticalAngledLensExtensionBlock;
+import com.cybrisoft.createmoderntech.block.lens.VerticalLensBlock;
 import com.cybrisoft.createmoderntech.client.ClientPacketHandlers;
 import com.cybrisoft.createmoderntech.registry.ModBlocks;
 import com.cybrisoft.createmoderntech.registry.ModPackets;
 import com.cybrisoft.createmoderntech.util.ChunkCache;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
+import com.mojang.datafixers.optics.Lens;
 import com.mojang.math.Axis;
 import com.simibubi.create.foundation.blockEntity.renderer.SmartBlockEntityRenderer;
 import dev.ryanhcode.sable.companion.SableCompanion;
@@ -20,7 +25,10 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.FrontAndTop;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.Vec3;
@@ -29,9 +37,7 @@ import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @OnlyIn(Dist.CLIENT)
@@ -175,68 +181,138 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             }
         }
 
-        // --- Lens config ---
-        float magnification = 1.0f;
-        float offset = 0;
-        BlockState aboveBlockState = level.getBlockState(rawPos.above());
-        int bottomMagLevel = 0;
-        if (isFacingDown(aboveBlockState)) {
-            if (aboveBlockState.is(ModBlocks.LENS_1X.get()))       bottomMagLevel = 1;
-            else if (aboveBlockState.is(ModBlocks.LENS_2X.get()))  bottomMagLevel = 2;
-            else if (aboveBlockState.is(ModBlocks.LENS_4X.get()))  bottomMagLevel = 4;
-            else if (aboveBlockState.is(ModBlocks.LENS_8X.get()))  bottomMagLevel = 8;
-            else if (aboveBlockState.is(ModBlocks.LENS_16X.get())) bottomMagLevel = 16;
-            offset++;
-        }
-        BlockPos lensPos = rawPos.above().above();
-        float[] color = {0.5f, 0.7f, 0.8f, 1.0f};
-        if (bottomMagLevel != 0) {
-            aboveBlockState = level.getBlockState(lensPos);
-            while (isLensExtension(aboveBlockState)) {
-                color = blendColor(aboveBlockState, color);
-                lensPos = lensPos.above();
-                aboveBlockState = level.getBlockState(lensPos);
-                if (aboveBlockState.is(ModBlocks.TELEPHOTO_EXTENSION)) offset += 0.5f;
-                if (aboveBlockState.is(ModBlocks.LIGHT_BOOST_FILTER)) color[3] *= 1.2f;
-                offset++;
-            }
-            aboveBlockState = level.getBlockState(lensPos);
-            if (isFacingUp(aboveBlockState)) {
-                int topMagLevel = 0;
-                if (aboveBlockState.is(ModBlocks.LENS_1X.get()))       topMagLevel = 1;
-                else if (aboveBlockState.is(ModBlocks.LENS_2X.get()))  topMagLevel = 2;
-                else if (aboveBlockState.is(ModBlocks.LENS_4X.get()))  topMagLevel = 4;
-                else if (aboveBlockState.is(ModBlocks.LENS_8X.get()))  topMagLevel = 8;
-                else if (aboveBlockState.is(ModBlocks.LENS_16X.get())) topMagLevel = 16;
-                magnification = (float) topMagLevel / bottomMagLevel;
-                offset++;
-            }
+        if (blockEntity.lensConfig == null || isInvalidated(level, blockEntity)) {
+            rebuildLensConfig(level, rawPos, blockEntity);
         }
 
-        if (blockEntity.cachedMagnification != magnification ||
-                blockEntity.cachedOffset != offset ||
-                !Arrays.equals(blockEntity.cachedColor, color)) {
-            blockEntity.cachedMagnification = magnification;
-            blockEntity.cachedOffset = offset;
-            blockEntity.cachedColor = color;
+        if (blockEntity.cachedMagnification != blockEntity.lensConfig.magnification ||
+                blockEntity.cachedOffset != blockEntity.lensConfig.offset ||
+                !Arrays.equals(blockEntity.cachedColor, blockEntity.lensConfig.color)) {
+            blockEntity.cachedMagnification = blockEntity.lensConfig.magnification;
+            blockEntity.cachedOffset = blockEntity.lensConfig.offset;
+            blockEntity.cachedColor = blockEntity.lensConfig.color;
             blockEntity.vboDirty = true;
         }
 
         Matrix4f cameraView = new Matrix4f(RenderSystem.getModelViewMatrix());
         ms.pushPose();
-        ms.translate(0.5, DISPLAY_HEIGHT + offset, 0.5);
+        ms.translate(0.5 + blockEntity.lensConfig.offset.x, DISPLAY_HEIGHT + blockEntity.lensConfig.offset.y, 0.5 + blockEntity.lensConfig.offset.z);
         ms.mulPose(Axis.YP.rotationDegrees(blockEntity.yaw));
         ms.mulPose(Axis.XP.rotationDegrees(blockEntity.pitch));
         renderVolumetricDisplay(ms, bufferSource, worldLevel, blockEntity, cameraView, deltaTicks,
-                new Vector3f(renderCenterX, sampleCenter.getY(), renderCenterZ), sampleRadius, magnification, color);
+                new Vector3f(renderCenterX, sampleCenter.getY(), renderCenterZ), sampleRadius, blockEntity.lensConfig.magnification, blockEntity.lensConfig.color);
         ms.popPose();
     }
 
+    private boolean isInvalidated(Level level, VolumetricDisplayBlockEntity blockEntity) {
+        if (blockEntity.lensConfig == null) return true;
+        for (BlockPos pos : blockEntity.lensConfig.lensCache.keySet()) {
+            BlockState state = blockEntity.lensConfig.lensCache.get(pos);
+            if (level.getBlockState(pos) != state) {
+                return true;
+            }
+        }
+        if (level.getBlockState(blockEntity.lensConfig.startPos) != blockEntity.lensConfig.startState) return true;
+        if (blockEntity.lensConfig.endPos != null && level.getBlockState(blockEntity.lensConfig.endPos) != blockEntity.lensConfig.endState) return true;
+        return false;
+    }
+
+    private void rebuildLensConfig(Level level, BlockPos rawPos, VolumetricDisplayBlockEntity blockEntity) {
+        VolumetricDisplayBlockEntity.LensConfig config = new VolumetricDisplayBlockEntity.LensConfig();
+
+        BlockState lensState = level.getBlockState(rawPos.above()); // start at block above display
+        int startMagLevel = 0;
+        if (isFacingDown(lensState)) {
+            if (lensState.is(ModBlocks.LENS_1X.get()))       startMagLevel = 1;
+            else if (lensState.is(ModBlocks.LENS_2X.get()))  startMagLevel = 2;
+            else if (lensState.is(ModBlocks.LENS_4X.get()))  startMagLevel = 4;
+            else if (lensState.is(ModBlocks.LENS_8X.get()))  startMagLevel = 8;
+            else if (lensState.is(ModBlocks.LENS_16X.get())) startMagLevel = 16;
+            config.offset.y += 1;
+        }
+        config.startPos = rawPos.above();
+        config.startState = lensState;
+        BlockPos nextPos = rawPos.above().above();
+        Direction currentDirection = Direction.UP;
+        if (startMagLevel != 0) {
+            lensState = level.getBlockState(nextPos);
+            while (isLensExtension(lensState)) {
+                BlockPos currentPos = nextPos;
+
+                if (config.lensCache.containsKey(currentPos)) {
+                    break;
+                }
+
+                config.color = blendColor(lensState, config.color);
+
+                lensState = level.getBlockState(currentPos);
+                if (lensState.is(ModBlocks.TELEPHOTO_EXTENSION)) config.offset.y += 0.5f;
+                if (lensState.is(ModBlocks.LIGHT_BOOST_FILTER)) config.color[3] *= 1.2f;
+
+                // determine where next block in the lens stack will be
+                if (lensState.getBlock() instanceof LensExtensionBlock) {
+                    Direction.Axis axis = lensState.getValue(BlockStateProperties.AXIS);
+
+                    if (currentDirection.getAxis() != axis) {
+                        break;
+                    }
+
+                    nextPos = currentPos.relative(currentDirection);
+                    config.offset.add(currentDirection.getStepX(), currentDirection.getStepY(), currentDirection.getStepZ());
+                } else if (lensState.getBlock() instanceof AngledLensExtensionBlock) {
+                    Direction direction = lensState.getValue(BlockStateProperties.FACING);
+                    // horizontal angled has lenses on its direction and its counter-clockwise direction
+                    if (currentDirection == direction.getOpposite()) {
+                        currentDirection = direction.getClockWise().getOpposite();
+                    } else if (currentDirection.getOpposite() == direction.getCounterClockWise()) {
+                        currentDirection = direction;
+                    } else {
+                        break;
+                    }
+                    nextPos = currentPos.relative(currentDirection);
+                    config.offset.add(currentDirection.getStepX(), currentDirection.getStepY(), currentDirection.getStepZ());
+                } else if (lensState.getBlock() instanceof VerticalAngledLensExtensionBlock) {
+                    FrontAndTop orientation = lensState.getValue(BlockStateProperties.ORIENTATION);
+                    // vertical angled has lenses on its top and its front direction
+                    Direction topDir = orientation.top();
+                    Direction frontDir = orientation.front();
+
+                    if (currentDirection == frontDir.getOpposite()) {
+                        currentDirection = topDir;
+                    } else if (currentDirection == topDir.getOpposite()) {
+                        currentDirection = frontDir;
+                    } else {
+                        break;
+                    }
+                    nextPos = currentPos.relative(currentDirection);
+                    config.offset.add(currentDirection.getStepX(), currentDirection.getStepY(), currentDirection.getStepZ());
+                }
+
+                config.lensCache.put(currentPos, lensState);
+            }
+            lensState = level.getBlockState(nextPos);
+            if (isFacingUp(lensState) && currentDirection == Direction.UP) {
+                int endMagLevel = 0;
+                if (lensState.is(ModBlocks.LENS_1X.get()))       endMagLevel = 1;
+                else if (lensState.is(ModBlocks.LENS_2X.get()))  endMagLevel = 2;
+                else if (lensState.is(ModBlocks.LENS_4X.get()))  endMagLevel = 4;
+                else if (lensState.is(ModBlocks.LENS_8X.get()))  endMagLevel = 8;
+                else if (lensState.is(ModBlocks.LENS_16X.get())) endMagLevel = 16;
+                config.magnification = (float) endMagLevel / startMagLevel;
+                config.offset.y += 1;
+            }
+            config.endPos = nextPos;
+            config.endState = lensState;
+        }
+
+        blockEntity.lensConfig = config;
+    }
+
     private boolean isLensExtension(BlockState state) {
-        return state.is(ModBlocks.LENS_EXTENSION) || state.is(ModBlocks.TELEPHOTO_EXTENSION)
-                || state.is(ModBlocks.LIME_COLOR_FILTER) || state.is(ModBlocks.PURPLE_COLOR_FILTER)
-                || state.is(ModBlocks.RED_COLOR_FILTER) || state.is(ModBlocks.WHITE_COLOR_FILTER)
-                || state.is(ModBlocks.LIGHT_BOOST_FILTER);
+        return state.is(ModBlocks.LENS_EXTENSION) || state.is(ModBlocks.ANGLED_LENS_EXTENSION) || state.is(ModBlocks.VERTICAL_ANGLED_LENS_EXTENSION)
+                || state.is(ModBlocks.TELEPHOTO_EXTENSION) || state.is(ModBlocks.LIME_COLOR_FILTER)
+                || state.is(ModBlocks.PURPLE_COLOR_FILTER) || state.is(ModBlocks.RED_COLOR_FILTER)
+                || state.is(ModBlocks.WHITE_COLOR_FILTER)  || state.is(ModBlocks.LIGHT_BOOST_FILTER);
     }
 
     private float[] blendColor(BlockState state, float[] color) {
@@ -391,6 +467,12 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             float posX = relX * VOXEL_SIZE * scale;
             float posY = relY * VOXEL_SIZE * scale;
             float posZ = relZ * VOXEL_SIZE * scale;
+
+            float minR2 = (scaledScan*scale - SCAN_BAND_WIDTH) * (scaledScan*scale - SCAN_BAND_WIDTH);
+            float maxR2 = (scaledScan*scale + SCAN_BAND_WIDTH) * (scaledScan*scale + SCAN_BAND_WIDTH);
+            float distSq = posX*posX + posZ*posZ;
+            if (distSq < minR2 || distSq > maxR2) continue;
+
             float distFromCenter = (float) Math.sqrt(posX * posX + posZ * posZ);
             float distToScan = Math.abs(distFromCenter - scaledScan * scale);
             if (distToScan > SCAN_BAND_WIDTH) continue;

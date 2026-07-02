@@ -67,6 +67,8 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.LENS_8X);
         pOutput.accept(ModBlocks.LENS_16X);
         pOutput.accept(ModBlocks.LENS_EXTENSION);
+        pOutput.accept(ModBlocks.ANGLED_LENS_EXTENSION);
+        pOutput.accept(ModBlocks.VERTICAL_ANGLED_LENS_EXTENSION);
         pOutput.accept(ModBlocks.TELEPHOTO_EXTENSION);
         pOutput.accept(ModBlocks.LIGHT_BOOST_FILTER);
         pOutput.accept(ModBlocks.LIME_COLOR_FILTER);
@@ -81,7 +83,9 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.AI_CORE_BLOCK);
 
         pOutput.accept(ModItems.BEACON_COMPASS);
-        pOutput.accept(ModItems.AI_CORE);
+        pOutput.accept(ModItems.ADJUSTABLE_SPYGLASS);
+
+        pOutput.accept(ModItems.AI_PROCESSOR);
         pOutput.accept(ModItems.LENS_ELEMENT);
         pOutput.accept(ModItems.OPTICAL_DRIVE);
         pOutput.accept(ModItems.DIAPHRAGM);

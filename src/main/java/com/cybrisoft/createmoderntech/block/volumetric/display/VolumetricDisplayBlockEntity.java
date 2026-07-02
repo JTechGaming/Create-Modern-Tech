@@ -15,6 +15,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,8 +46,9 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
 
     // Lens config cache
     float cachedMagnification = -1f;
-    float cachedOffset = -1f;
+    Vector3f cachedOffset = new Vector3f(0, -1, 0);
     float[] cachedColor = null;
+    public LensConfig lensConfig = null;
 
     // --- Chunk cache state ---
     Object chunkCache = null;
@@ -146,5 +148,15 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
         public float r() { return ((color >> 16) & 0xFF) / 255f; }
         public float g() { return ((color >> 8)  & 0xFF) / 255f; }
         public float b() { return  (color        & 0xFF) / 255f; }
+    }
+
+    public static class LensConfig {
+        public float magnification = 1.0f;
+        public Vector3f offset = new Vector3f();
+        public float[] color = {0.5f, 0.7f, 0.8f, 1.0f};
+        public Map<BlockPos, BlockState> lensCache = new HashMap<>();
+        public BlockPos nextPos = null;
+        public BlockPos startPos, endPos;
+        public BlockState startState, endState;
     }
 }

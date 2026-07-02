@@ -6,12 +6,14 @@ import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockItem;
 import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlock;
 import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockItem;
 import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlock;
+import com.cybrisoft.createmoderntech.block.lens.AngledLensExtensionBlock;
+import com.cybrisoft.createmoderntech.block.lens.VerticalAngledLensExtensionBlock;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlock;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockItem;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlock;
 import com.cybrisoft.createmoderntech.config.ModernTechStress;
 import com.cybrisoft.createmoderntech.block.lens.VerticalLensBlock;
-import com.cybrisoft.createmoderntech.block.lens.VerticalLensExtensionBlock;
+import com.cybrisoft.createmoderntech.block.lens.LensExtensionBlock;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanXControllerBlock;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanZControllerBlock;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.rotation.PitchControllerBlock;
@@ -160,16 +162,31 @@ public class ModBlocks {
     public static final BlockEntry<VerticalLensBlock> LENS_4X = registerLens("lens_4x");
     public static final BlockEntry<VerticalLensBlock> LENS_8X = registerLens("lens_8x");
     public static final BlockEntry<VerticalLensBlock> LENS_16X = registerLens("lens_16x");
-    public static final BlockEntry<VerticalLensExtensionBlock> LENS_EXTENSION = registerExtension("lens_extension");
-    public static final BlockEntry<VerticalLensExtensionBlock> TELEPHOTO_EXTENSION = registerExtension("telephoto_extension");
-    public static final BlockEntry<VerticalLensExtensionBlock> LIME_COLOR_FILTER = registerExtension("lime_color_filter");
-    public static final BlockEntry<VerticalLensExtensionBlock> RED_COLOR_FILTER = registerExtension("red_color_filter");
-    public static final BlockEntry<VerticalLensExtensionBlock> PURPLE_COLOR_FILTER = registerExtension("purple_color_filter");
-    public static final BlockEntry<VerticalLensExtensionBlock> WHITE_COLOR_FILTER = registerExtension("white_color_filter");
-    public static final BlockEntry<VerticalLensExtensionBlock> LIGHT_BOOST_FILTER = registerExtension("light_boost_filter");
+    public static final BlockEntry<LensExtensionBlock> LENS_EXTENSION = registerExtension("lens_extension");
+    public static final BlockEntry<LensExtensionBlock> TELEPHOTO_EXTENSION = registerExtension("telephoto_extension");
+    public static final BlockEntry<LensExtensionBlock> LIME_COLOR_FILTER = registerExtension("lime_color_filter");
+    public static final BlockEntry<LensExtensionBlock> RED_COLOR_FILTER = registerExtension("red_color_filter");
+    public static final BlockEntry<LensExtensionBlock> PURPLE_COLOR_FILTER = registerExtension("purple_color_filter");
+    public static final BlockEntry<LensExtensionBlock> WHITE_COLOR_FILTER = registerExtension("white_color_filter");
+    public static final BlockEntry<LensExtensionBlock> LIGHT_BOOST_FILTER = registerExtension("light_boost_filter");
 
-    private static BlockEntry<VerticalLensExtensionBlock> registerExtension(String name) {
-        return REGISTRATE.block(name, VerticalLensExtensionBlock::new)
+    public static final BlockEntry<AngledLensExtensionBlock> ANGLED_LENS_EXTENSION = REGISTRATE.block("angled_lens_extension", AngledLensExtensionBlock::new)
+            .initialProperties(SharedProperties::softMetal)
+            .properties(p -> p.noOcclusion().strength(0.5f))
+            .transform(axeOrPickaxe())
+            .blockstate((c, p) -> p.directionalBlock(c.getEntry(),AssetLookup.standardModel(c, p)))
+            .simpleItem()
+            .register();
+    public static final BlockEntry<VerticalAngledLensExtensionBlock> VERTICAL_ANGLED_LENS_EXTENSION = REGISTRATE.block("vertical_angled_lens_extension", VerticalAngledLensExtensionBlock::new)
+            .initialProperties(SharedProperties::softMetal)
+            .properties(p -> p.noOcclusion().strength(0.5f))
+            .transform(axeOrPickaxe())
+            .blockstate((c, p) -> p.directionalBlock(c.getEntry(),AssetLookup.standardModel(c, p)))
+            .simpleItem()
+            .register();
+
+    private static BlockEntry<LensExtensionBlock> registerExtension(String name) {
+        return REGISTRATE.block(name, LensExtensionBlock::new)
                 .initialProperties(SharedProperties::softMetal)
                 .properties(p -> p.noOcclusion().strength(0.5f))
                 .transform(axeOrPickaxe())

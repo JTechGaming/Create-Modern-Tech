@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "L": { "item": "createmoderntech:lens_extension" },
+    "S": { "item": "create:sturdy_sheet" }
+  },
+  "pattern": [
+    "LS",
+    " L"
+  ],
+  "result": { "id": "createmoderntech:vertical_angled_lens_extension" },
+  "show_notification": true
+}

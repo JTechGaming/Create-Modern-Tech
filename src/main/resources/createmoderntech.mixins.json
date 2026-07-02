@@ -3,9 +3,9 @@
   "minVersion": "0.8",
   "package": "com.cybrisoft.createmoderntech.mixin",
   "compatibilityLevel": "JAVA_21",
-  "mixins": [
-  ],
   "client": [
+    "GameRendererMixin",
+    "GuiMixin"
   ],
   "injectors": {
     "defaultRequire": 1

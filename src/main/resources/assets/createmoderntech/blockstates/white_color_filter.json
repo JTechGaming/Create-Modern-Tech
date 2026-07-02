@@ -1,27 +1,16 @@
 {
   "variants": {
-    "facing=up": {
+    "axis=y": {
       "model": "createmoderntech:block/white_color_filter",
-      "x": 270
+      "x": 90,
+      "y": 90
     },
-    "facing=down": {
-      "model": "createmoderntech:block/white_color_filter",
-      "x": 90
-    },
-    "facing=north": {
-      "model": "createmoderntech:block/white_color_filter"
-    },
-    "facing=south": {
-      "model": "createmoderntech:block/white_color_filter",
-      "y": 180
-    },
-    "facing=west": {
-      "model": "createmoderntech:block/white_color_filter",
-      "y": 270
-    },
-    "facing=east": {
+    "axis=x": {
       "model": "createmoderntech:block/white_color_filter",
       "y": 90
+    },
+    "axis=z": {
+      "model": "createmoderntech:block/white_color_filter"
     }
   }
 }

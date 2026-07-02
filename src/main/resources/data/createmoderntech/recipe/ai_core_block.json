@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "A": { "item": "createmoderntech:ai_core" },
+    "A": { "item": "createmoderntech:ai_processor" },
     "C": { "item": "create:brass_ingot" }
   },
   "pattern": [

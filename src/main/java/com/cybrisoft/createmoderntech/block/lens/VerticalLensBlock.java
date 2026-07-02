@@ -1,9 +1,12 @@
 package com.cybrisoft.createmoderntech.block.lens;
 
 import com.mojang.serialization.MapCodec;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
@@ -14,7 +17,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.NonNull;
 
-public class VerticalLensBlock extends DirectionalBlock {
+public class VerticalLensBlock extends DirectionalBlock implements IWrenchable {
     // UP (270X)
     private static final VoxelShape UP_SHAPE = Shapes.or(
             Block.box(1, 14, 13, 15, 16, 15), Block.box(1, 14, 1, 15, 16, 3),
@@ -63,8 +66,15 @@ public class VerticalLensBlock extends DirectionalBlock {
     public BlockState getStateForPlacement(BlockPlaceContext context) {
         Direction clickedFace = context.getClickedFace();
         if (clickedFace.getAxis().isVertical()) {
-            return this.defaultBlockState().setValue(FACING, clickedFace);
+            return this.defaultBlockState().setValue(FACING, clickedFace.getOpposite());
         }
         return this.defaultBlockState().setValue(FACING, context.getNearestLookingVerticalDirection());
+    }
+
+    @Override
+    public InteractionResult onWrenched(BlockState state, UseOnContext context) {
+        BlockState newState = state.setValue(FACING, state.getValue(FACING) == Direction.UP ? Direction.DOWN : Direction.UP);
+        context.getLevel().setBlock(context.getClickedPos(), newState, 3);
+        return InteractionResult.SUCCESS;
     }
 }

@@ -1,6 +1,5 @@
 package com.cybrisoft.createmoderntech.block.volumetric.controller;
 
-import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
 import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

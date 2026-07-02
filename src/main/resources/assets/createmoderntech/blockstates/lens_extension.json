@@ -1,27 +1,16 @@
 {
   "variants": {
-    "facing=up": {
+    "axis=y": {
       "model": "createmoderntech:block/lens_extension",
-      "x": 270
+      "x": 90,
+      "y": 90
     },
-    "facing=down": {
-      "model": "createmoderntech:block/lens_extension",
-      "x": 90
-    },
-    "facing=north": {
-      "model": "createmoderntech:block/lens_extension"
-    },
-    "facing=south": {
-      "model": "createmoderntech:block/lens_extension",
-      "y": 180
-    },
-    "facing=west": {
-      "model": "createmoderntech:block/lens_extension",
-      "y": 270
-    },
-    "facing=east": {
+    "axis=x": {
       "model": "createmoderntech:block/lens_extension",
       "y": 90
+    },
+    "axis=z": {
+      "model": "createmoderntech:block/lens_extension"
     }
   }
 }

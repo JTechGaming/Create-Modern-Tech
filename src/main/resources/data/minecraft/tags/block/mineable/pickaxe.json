@@ -1,0 +1,27 @@
+{
+  "values": [
+    "createmoderntech:volumetric_display",
+    "createmoderntech:volumetric_shaft",
+    "createmoderntech:pan_x_controller",
+    "createmoderntech:pan_z_controller",
+    "createmoderntech:pitch_controller",
+    "createmoderntech:yaw_controller",
+    "createmoderntech:beacon_controller",
+    "createmoderntech:audio_trigger",
+    "createmoderntech:ai_core_block",
+    "createmoderntech:speaker",
+    "createmoderntech:lens_extension",
+    "createmoderntech:lens_1x",
+    "createmoderntech:lens_2x",
+    "createmoderntech:lens_4x",
+    "createmoderntech:lens_8x",
+    "createmoderntech:lens_16x",
+    "createmoderntech:light_boost_filter",
+    "createmoderntech:lime_color_filter",
+    "createmoderntech:red_color_filter",
+    "createmoderntech:purple_color_filter",
+    "createmoderntech:white_color_filter",
+    "createmoderntech:angled_lens_extension",
+    "createmoderntech:verticalangled_lens_extension"
+  ]
+}

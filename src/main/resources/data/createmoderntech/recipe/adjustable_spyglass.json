@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "L": { "item": "createmoderntech:lens_element" },
+    "S": { "item": "minecraft:spyglass" },
+    "C": { "item": "create:cogwheel" }
+  },
+  "pattern": [
+    " L ",
+    " C ",
+    " S "
+  ],
+  "result": { "id": "createmoderntech:adjustable_spyglass" },
+  "show_notification": true
+}
