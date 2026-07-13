@@ -3,13 +3,17 @@ package com.cybrisoft.createmoderntech.block.audiotrigger;
 import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockEntity;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
 import com.cybrisoft.createmoderntech.network.PlaySpeakerPacket;
+import com.cybrisoft.createmoderntech.registry.TriggerVarProviderRegistry;
 import com.cybrisoft.createmoderntech.util.ServerAINetworkManager;
+import com.cybrisoft.createmoderntech.util.TriggerVariableEntry;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import dev.ryanhcode.sable.companion.SableCompanion;
 import dev.ryanhcode.sable.companion.SubLevelAccess;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -21,6 +25,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.joml.Vector3d;
 import org.joml.Vector3dc;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -84,6 +89,30 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
         }
     }
 
+    public List<TriggerVariableEntry> getVars() {
+        List<TriggerVariableEntry> vars = new ArrayList<>();
+        if (level == null) return vars;
+
+        for (Direction dir : Direction.values()) {
+            BlockPos dirPos = getBlockPos().relative(dir);
+            BlockEntity dirBe = level.getBlockEntity(dirPos);
+
+            if (dirBe != null && TriggerVarProviderRegistry.isProvider(dirBe)) {
+                String value = TriggerVarProviderRegistry.resolve(dirBe);
+
+                if (value.isBlank()) {
+                    value = "No value";
+                }
+
+                BlockState dirState = level.getBlockState(dirPos);
+                String identifier = BuiltInRegistries.BLOCK.getKey(dirState.getBlock()).toString();
+
+                vars.add(new TriggerVariableEntry(dir, value, identifier));
+            }
+        }
+        return vars;
+    }
+
     private void trigger() {
         if (networkId == null || message.isBlank()) return;
 
@@ -102,7 +131,7 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
         }
 
         UUID netId = this.networkId;
-        String msg = this.message;
+        String msg = buildMessageString();
 
         for (ServerPlayer player : serverLevel.players()) {
             boolean inRange = speakerPositions.stream().anyMatch(speakerPos -> {
@@ -121,6 +150,32 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
                         new PlaySpeakerPacket(netId, msg, speakerPositions));
             }
         }
+    }
+
+    private @NonNull String buildMessageString() {
+        String msg = this.message;
+
+        List<TriggerVariableEntry> vars = getVars();
+        TriggerVariableEntry upEntry = null, downEntry = null, northEntry = null, southEntry = null, westEntry = null, eastEntry = null;
+
+        for (TriggerVariableEntry var : vars) {
+            switch (var.getDirection()) {
+                case DOWN -> downEntry = var;
+                case UP -> upEntry = var;
+                case NORTH -> northEntry = var;
+                case SOUTH -> southEntry = var;
+                case WEST -> westEntry = var;
+                case EAST -> eastEntry = var;
+            }
+        }
+
+        msg = msg.replace("%D", downEntry != null ? downEntry.getValue() : "");
+        msg = msg.replace("%U", upEntry != null ? upEntry.getValue() : "");
+        msg = msg.replace("%N", northEntry != null ? northEntry.getValue() : "");
+        msg = msg.replace("%S", southEntry != null ? southEntry.getValue() : "");
+        msg = msg.replace("%W", westEntry != null ? westEntry.getValue() : "");
+        msg = msg.replace("%E", eastEntry != null ? eastEntry.getValue() : "");
+        return msg;
     }
 
     @Override

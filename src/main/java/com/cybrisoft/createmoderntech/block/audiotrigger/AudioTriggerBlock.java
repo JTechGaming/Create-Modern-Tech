@@ -5,8 +5,12 @@ import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockItem;
 import com.cybrisoft.createmoderntech.network.OpenAudioTriggerScreenPacket;
 import com.cybrisoft.createmoderntech.registry.ModBlockEntityTypes;
 import com.cybrisoft.createmoderntech.registry.ModDataComponents;
+import com.cybrisoft.createmoderntech.registry.TriggerVarProviderRegistry;
+import com.cybrisoft.createmoderntech.util.TriggerVariableEntry;
 import com.simibubi.create.foundation.block.IBE;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -21,6 +25,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.network.PacketDistributor;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 public class AudioTriggerBlock extends Block implements IBE<AudioTriggerBlockEntity> {
@@ -49,7 +55,7 @@ public class AudioTriggerBlock extends Block implements IBE<AudioTriggerBlockEnt
                 return InteractionResult.SUCCESS;
             }
 
-            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenAudioTriggerScreenPacket(pos, be.message));
+            PacketDistributor.sendToPlayer((ServerPlayer) player, new OpenAudioTriggerScreenPacket(pos, be.message, be.getVars()));
             return InteractionResult.SUCCESS;
         });
     }

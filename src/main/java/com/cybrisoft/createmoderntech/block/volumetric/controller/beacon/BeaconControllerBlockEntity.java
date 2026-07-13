@@ -7,6 +7,8 @@ import com.cybrisoft.createmoderntech.item.BeaconCompassData;
 import com.cybrisoft.createmoderntech.registry.ModDataComponents;
 import com.cybrisoft.createmoderntech.registry.ModItems;
 import com.simibubi.create.content.trains.schedule.condition.TimedWaitCondition;
+import dev.ryanhcode.sable.companion.SableCompanion;
+import dev.ryanhcode.sable.companion.SubLevelAccess;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -17,6 +19,7 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -74,8 +77,17 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
         VolumetricDisplayBlockEntity display = getLinkedDisplay();
         if (display == null) return;
 
-        float cursorX = display.getBlockPos().getX() + display.panX;
-        float cursorZ = display.getBlockPos().getZ() + display.panZ;
+        BlockPos rawPos = display.getBlockPos();
+        SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(level, rawPos);
+        Vec3 projectedPos;
+        if (subLevel != null) {
+            projectedPos = subLevel.logicalPose().transformPosition(rawPos.getCenter());
+        } else {
+            projectedPos = rawPos.getCenter();
+        }
+
+        float cursorX = (float) (projectedPos.x + display.panX);
+        float cursorZ = (float) (projectedPos.z + display.panZ);
 
         // Check if cursor overlaps an existing beacon (within 8 blocks)
         VolumetricDisplayBlockEntity.BeaconData overlapping = null;
@@ -131,8 +143,17 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
     }
 
     private static VolumetricDisplayBlockEntity.BeaconData getNearestBeacon(VolumetricDisplayBlockEntity display) {
-        float cursorX = display.getBlockPos().getX() + display.panX;
-        float cursorZ = display.getBlockPos().getZ() + display.panZ;
+        BlockPos rawPos = display.getBlockPos();
+        SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(display.getLevel(), rawPos);
+        Vec3 projectedPos;
+        if (subLevel != null) {
+            projectedPos = subLevel.logicalPose().transformPosition(rawPos.getCenter());
+        } else {
+            projectedPos = rawPos.getCenter();
+        }
+
+        float cursorX = (float) (projectedPos.x + display.panX);
+        float cursorZ = (float) (projectedPos.z + display.panZ);
 
         // Find nearest beacon to cursor
         VolumetricDisplayBlockEntity.BeaconData selected = null;

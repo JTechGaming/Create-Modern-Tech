@@ -26,7 +26,7 @@ public class ClientPacketHandlers {
                                                     IPayloadContext context) {
         context.enqueueWork(() ->
                 Minecraft.getInstance().setScreen(
-                        new AudioTriggerScreen(packet.pos(), packet.message())));
+                        new AudioTriggerScreen(packet.pos(), packet.message(), packet.vars())));
     }
 
     public static void handlePlaySpeaker(PlaySpeakerPacket packet,

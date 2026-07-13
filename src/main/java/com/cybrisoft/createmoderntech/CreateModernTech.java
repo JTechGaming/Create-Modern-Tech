@@ -2,6 +2,9 @@ package com.cybrisoft.createmoderntech;
 
 import com.cybrisoft.createmoderntech.client.BeaconCompassClientEvents;
 import com.cybrisoft.createmoderntech.client.ClientModEvents;
+import com.cybrisoft.createmoderntech.compat.VanillaTriggerVarProviders;
+import com.cybrisoft.createmoderntech.compat.create.CreateTriggerVarProviders;
+import com.cybrisoft.createmoderntech.compat.simulated.SimulatedTriggerVarProviders;
 import com.cybrisoft.createmoderntech.config.ModernTechAllConfigs;
 import com.cybrisoft.createmoderntech.ponder.ModernTechPonderPlugin;
 import com.cybrisoft.createmoderntech.registry.*;
@@ -58,6 +61,10 @@ public class CreateModernTech {
         ModPackets.register(modEventBus);
 
         ModernTechAllConfigs.register(ModLoadingContext.get(), modContainer);
+
+        new VanillaTriggerVarProviders().register();
+        new CreateTriggerVarProviders().register();
+        new SimulatedTriggerVarProviders().register();
 
         modEventBus.addListener(CreateModernTech::init);
         modEventBus.addListener(CreateModernTech::onLoadComplete);

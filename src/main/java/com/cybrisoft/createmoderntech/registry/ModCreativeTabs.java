@@ -82,6 +82,10 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.AUDIO_TRIGGER_BLOCK);
         pOutput.accept(ModBlocks.AI_CORE_BLOCK);
 
+        pOutput.accept(ModBlocks.WARP_GATE_BLOCK);
+        pOutput.accept(ModBlocks.WARP_GATE_TERMINAL_BLOCK);
+        pOutput.accept(ModBlocks.WARP_GATE_TRANSPONDER_BLOCK);
+
         pOutput.accept(ModItems.BEACON_COMPASS);
         pOutput.accept(ModItems.ADJUSTABLE_SPYGLASS);
 

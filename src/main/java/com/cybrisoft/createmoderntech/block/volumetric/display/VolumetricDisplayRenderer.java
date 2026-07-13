@@ -89,7 +89,6 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         Level level = blockEntity.getLevel();
         if (level == null) return;
 
-        long currentTime = level.getGameTime();
         BlockPos rawPos = blockEntity.getBlockPos();
         SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(level, rawPos);
         Vec3 projectedPos;
@@ -349,7 +348,6 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
                                          Matrix4f cameraView, float deltaTicks,
                                          Vector3f sampleCenter, int sampleRadius, float magnification, float[] color) {
         float time = blockEntity.getLevel().getGameTime() + AnimationTickHolder.getPartialTicks();
-        float pulse = 1.0f + ((float) Math.sin(time * 0.02f) * 0.02f);
 
         float scanSpeed = (blockEntity.targetRadius / MAX_CHUNK_RADIUS) * 0.1f;
         float scanPos = (time * scanSpeed) % 10.0f;
@@ -435,8 +433,8 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             ms.pushPose();
             float subOffsetX = (sampleCenter.x - blockEntity.lastCenterPos.getX()) * VOXEL_SIZE;
             float subOffsetZ = (sampleCenter.z - blockEntity.lastCenterPos.getZ()) * VOXEL_SIZE;
-            ms.translate(-subOffsetX * magnification * pulse, 0, -subOffsetZ * magnification * pulse);
-            ms.scale(magnification * pulse, magnification * pulse, magnification * pulse);
+            ms.translate(-subOffsetX * magnification, 0, -subOffsetZ * magnification);
+            ms.scale(magnification, magnification, magnification);
 
             HOLOGRAM_RENDER_TYPE.setupRenderState();
             blockEntity.staticVBO.bind();
@@ -452,7 +450,7 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         // Inline scan pass
         VertexConsumer scanBuffer = bufferSource.getBuffer(HOLOGRAM_RENDER_TYPE);
         Matrix4f matrix = ms.last().pose();
-        float scale = magnification * pulse;
+        float scale = magnification;
         float scaledScan = scanPos * VOXEL_SIZE * 50f;
 
         if (blockEntity.chunkCache == null) {
@@ -506,6 +504,30 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             drawCursor(ms.last().pose(), scanBuffer, scale, beaconColor, time, xOutOfRange || zOutOfRange, false);
             ms.popPose();
         }
+
+        // origin
+        BlockPos rawPos = blockEntity.getBlockPos();
+        SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(worldLevel, rawPos);
+        Vec3 projectedPos;
+        if (subLevel != null) {
+            projectedPos = subLevel.logicalPose().transformPosition(Vec3.atCenterOf(rawPos));
+        } else {
+            projectedPos = Vec3.atCenterOf(rawPos);
+        }
+
+        float relX = (float) (projectedPos.x() - sampleCenter.x());
+        float relZ = (float) (projectedPos.z() - sampleCenter.z());
+
+        float radiusInBlocks = blockEntity.currentRadius * 16f;
+        boolean xOutOfRange = relX > radiusInBlocks || relX < -radiusInBlocks;
+        boolean zOutOfRange = relZ > radiusInBlocks || relZ < -radiusInBlocks;
+        if (xOutOfRange) relX = Math.signum(relX) * radiusInBlocks;
+        if (zOutOfRange) relZ = Math.signum(relZ) * radiusInBlocks;
+
+        ms.pushPose();
+        ms.translate(relX * VOXEL_SIZE * scale, 0, relZ * VOXEL_SIZE * scale);
+        drawCursor(ms.last().pose(), scanBuffer, scale, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, time, xOutOfRange || zOutOfRange, true);
+        ms.popPose();
     }
 
     // -------------------------------------------------------------------------

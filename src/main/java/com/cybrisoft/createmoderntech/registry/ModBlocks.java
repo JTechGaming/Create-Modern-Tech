@@ -11,6 +11,9 @@ import com.cybrisoft.createmoderntech.block.lens.VerticalAngledLensExtensionBloc
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlock;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockItem;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlock;
+import com.cybrisoft.createmoderntech.block.warpgate.WarpGateBlock;
+import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTerminalBlock;
+import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTransponderBlock;
 import com.cybrisoft.createmoderntech.config.ModernTechStress;
 import com.cybrisoft.createmoderntech.block.lens.VerticalLensBlock;
 import com.cybrisoft.createmoderntech.block.lens.LensExtensionBlock;
@@ -155,6 +158,42 @@ public class ModBlocks {
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
                     .item(AICoreBlockItem::new).build()
+                    .register();
+
+    public static final BlockEntry<WarpGateTransponderBlock> WARP_GATE_TRANSPONDER_BLOCK =
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))).block("warp_gate_transponder", WarpGateTransponderBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .transform(BuilderTransformers.bearing("windmill", "gearbox"))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .transform(ModernTechStress.setImpact(1.0))
+                    .simpleItem()
+                    .register();
+
+    public static final BlockEntry<WarpGateBlock> WARP_GATE_BLOCK =
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))).block("warp_gate", WarpGateBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .simpleItem()
+                    .register();
+
+    public static final BlockEntry<WarpGateTerminalBlock> WARP_GATE_TERMINAL_BLOCK =
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))).block("warp_gate_terminal", WarpGateTerminalBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .transform(BuilderTransformers.bearing("windmill", "gearbox"))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .simpleItem()
                     .register();
 
     public static final BlockEntry<VerticalLensBlock> LENS_1X = registerLens("lens_1x");

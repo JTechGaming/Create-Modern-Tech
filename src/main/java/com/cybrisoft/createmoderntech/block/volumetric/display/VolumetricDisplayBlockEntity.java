@@ -13,6 +13,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import org.joml.Vector3f;
@@ -94,6 +95,12 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
         }
         tag.put("Beacons", beaconList);
     }
+
+    //todo :
+//    @Override
+//    public AABB getRenderBoundingBox() {
+//        return
+//    }
 
     @Override
     protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {

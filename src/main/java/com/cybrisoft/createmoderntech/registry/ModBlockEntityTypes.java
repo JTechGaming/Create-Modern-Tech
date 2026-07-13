@@ -14,6 +14,9 @@ import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconC
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayRenderer;
 import com.cybrisoft.createmoderntech.block.volumetric.shaft.VolumetricShaftBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTerminalBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTerminalRenderer;
+import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTransponderBlockEntity;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
 import com.simibubi.create.content.kinetics.base.ShaftRenderer;
@@ -82,6 +85,18 @@ public class ModBlockEntityTypes {
     public static final BlockEntityEntry<AICoreBlockEntity> AI_CORE_BLOCK = REGISTRATE
             .blockEntity("ai_core_block", AICoreBlockEntity::new)
             .validBlocks(ModBlocks.AI_CORE_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<WarpGateTransponderBlockEntity> WARP_GATE_TRANSPONDER = REGISTRATE
+            .blockEntity("warp_gate_transponder", WarpGateTransponderBlockEntity::new)
+            .visual(() -> OrientedRotatingVisual.of(AllPartialModels.SHAFT_HALF))
+            .validBlocks(ModBlocks.WARP_GATE_TRANSPONDER_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<WarpGateTerminalBlockEntity> WARP_GATE_TERMINAL = REGISTRATE
+            .blockEntity("warp_gate_terminal", WarpGateTerminalBlockEntity::new)
+            .validBlocks(ModBlocks.WARP_GATE_TERMINAL_BLOCK)
+            .renderer(() -> WarpGateTerminalRenderer::new)
             .register();
 
     public static void register() {

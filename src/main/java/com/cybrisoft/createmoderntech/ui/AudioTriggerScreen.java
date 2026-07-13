@@ -1,10 +1,12 @@
 package com.cybrisoft.createmoderntech.ui;
 
 import com.cybrisoft.createmoderntech.network.UpdateAudioTriggerPacket;
-import com.cybrisoft.createmoderntech.registry.ModPackets;
+import com.cybrisoft.createmoderntech.util.TriggerVariableEntry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -13,16 +15,20 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.network.PacketDistributor;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.List;
+
 @OnlyIn(Dist.CLIENT)
 public class AudioTriggerScreen extends Screen {
     private final BlockPos blockPos;
     private String currentMessage;
     private EditBox messageField;
+    private final List<TriggerVariableEntry> vars;
 
-    public AudioTriggerScreen(BlockPos pos, String currentMessage) {
+    public AudioTriggerScreen(BlockPos pos, String currentMessage, List<TriggerVariableEntry> vars) {
         super(Component.literal("Audio Trigger"));
         this.blockPos = pos;
         this.currentMessage = currentMessage;
+        this.vars = vars;
     }
 
     @Override
@@ -40,6 +46,8 @@ public class AudioTriggerScreen extends Screen {
         addRenderableWidget(Button.builder(Component.literal("Confirm"), btn -> confirm())
                 .bounds(width / 2 - 50, height / 2 + 20, 100, 20)
                 .build());
+
+        addRenderableWidget(new TriggerVariableListWidget(Minecraft.getInstance(), this.width, 300, 20, 10, vars));
     }
 
     private void confirm() {
@@ -66,3 +74,4 @@ public class AudioTriggerScreen extends Screen {
     @Override
     public boolean isPauseScreen() { return false; }
 }
+
