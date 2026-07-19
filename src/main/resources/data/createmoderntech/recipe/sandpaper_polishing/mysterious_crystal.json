@@ -1,0 +1,13 @@
+{
+  "type": "create:sandpaper_polishing",
+  "ingredients": [
+    {
+      "item": "createmoderntech:rough_mysterious_crystal"
+    }
+  ],
+  "results": [
+    {
+      "id": "createmoderntech:mysterious_crystal"
+    }
+  ]
+}

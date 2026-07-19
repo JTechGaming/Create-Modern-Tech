@@ -1,0 +1,43 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": false,
+  "category": "misc",
+  "key": {
+    "O": {
+      "item": "createmoderntech:optical_drive"
+    },
+    "C": {
+      "item": "createmoderntech:mysterious_crystal"
+    },
+    "L": {
+      "item": "createmoderntech:lens_element"
+    },
+    "P": {
+      "item": "createmoderntech:high_frequency_plating"
+    },
+    "B": {
+      "item": "create:railway_casing"
+    },
+    "E": {
+      "item": "create:electron_tube"
+    },
+    "R": {
+      "item": "simulated:laser_pointer"
+    },
+    "M": {
+      "item": "simulated:laser_pointer"
+    }
+  },
+  "pattern": [
+    "PPLPP",
+    "PEOEP",
+    "PBCBP",
+    "PEMEP",
+    "PPRPP"
+  ],
+  "result": {
+    "count": 1,
+    "id": "createmoderntech:warp_drive"
+  },
+  "show_notification": false
+}

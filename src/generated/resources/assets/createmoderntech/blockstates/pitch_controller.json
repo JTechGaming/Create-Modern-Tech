@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "createmoderntech:block/pitch_controller",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "createmoderntech:block/pitch_controller",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "createmoderntech:block/pitch_controller",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "createmoderntech:block/pitch_controller",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "createmoderntech:block/pitch_controller"
+    },
+    "facing=west": {
+      "model": "createmoderntech:block/pitch_controller",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

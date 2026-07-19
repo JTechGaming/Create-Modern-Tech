@@ -1,0 +1,26 @@
+{
+  "portal_activate": {
+    "subtitle": "sounds.createmoderntech.portal_activate",
+    "sounds": [
+      "createmoderntech:portal_activate"
+    ]
+  },
+  "portal_close": {
+    "subtitle": "sounds.createmoderntech.portal_close",
+    "sounds": [
+      "createmoderntech:portal_close"
+    ]
+  },
+  "warp_transition": {
+    "subtitle": "sounds.createmoderntech.warp_transition",
+    "sounds": [
+      "createmoderntech:warp_transition"
+    ]
+  },
+  "warp_ambiance": {
+    "subtitle": "sounds.createmoderntech.warp_ambiance",
+    "sounds": [
+      "createmoderntech:warp_ambiance"
+    ]
+  }
+}

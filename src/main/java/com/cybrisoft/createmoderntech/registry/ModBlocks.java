@@ -10,10 +10,13 @@ import com.cybrisoft.createmoderntech.block.lens.AngledLensExtensionBlock;
 import com.cybrisoft.createmoderntech.block.lens.VerticalAngledLensExtensionBlock;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlock;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockItem;
+import com.cybrisoft.createmoderntech.block.springbuffer.SpringBufferBlock;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlock;
+import com.cybrisoft.createmoderntech.block.warpgate.amplifier.WarpAmplifierBlock;
+import com.cybrisoft.createmoderntech.block.warpgate.drive.WarpDriveBlock;
 import com.cybrisoft.createmoderntech.block.warpgate.WarpGateBlock;
-import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTerminalBlock;
-import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTransponderBlock;
+import com.cybrisoft.createmoderntech.block.warpgate.termimal.WarpGateTerminalBlock;
+import com.cybrisoft.createmoderntech.block.warpgate.transponder.WarpGateTransponderBlock;
 import com.cybrisoft.createmoderntech.config.ModernTechStress;
 import com.cybrisoft.createmoderntech.block.lens.VerticalLensBlock;
 import com.cybrisoft.createmoderntech.block.lens.LensExtensionBlock;
@@ -31,9 +34,11 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import net.createmod.catnip.lang.FontHelper;
+import net.minecraft.world.level.block.Block;
 
 import static com.cybrisoft.createmoderntech.CreateModernTech.REGISTRATE;
 import static com.simibubi.create.foundation.data.TagGen.axeOrPickaxe;
+import static com.simibubi.create.foundation.data.TagGen.pickaxeOnly;
 
 @SuppressWarnings("removal")
 public class ModBlocks {
@@ -48,6 +53,7 @@ public class ModBlocks {
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
                     .transform(ModernTechStress.setImpact(4.0))
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .simpleItem()
                     .register();
 
@@ -58,7 +64,7 @@ public class ModBlocks {
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
-                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .simpleItem()
                     .register();
 
@@ -133,12 +139,23 @@ public class ModBlocks {
                     .simpleItem()
                     .register();
 
+    public static final BlockEntry<SpringBufferBlock> SPRING_BUFFER_BLOCK =
+            REGISTRATE.block("spring_buffer", SpringBufferBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .properties(p -> p.noOcclusion().strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .simpleItem()
+                    .register();
+
     public static final BlockEntry<SpeakerBlock> SPEAKER_BLOCK =
             REGISTRATE.block("speaker", SpeakerBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .item(SpeakerBlockItem::new).build()
                     .register();
 
@@ -148,6 +165,7 @@ public class ModBlocks {
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .item(AudioTriggerBlockItem::new).build()
                     .register();
 
@@ -157,6 +175,7 @@ public class ModBlocks {
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .item(AICoreBlockItem::new).build()
                     .register();
 
@@ -168,8 +187,8 @@ public class ModBlocks {
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
-                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
-                    .transform(ModernTechStress.setImpact(1.0))
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .transform(ModernTechStress.setImpact(4.0))
                     .simpleItem()
                     .register();
 
@@ -180,7 +199,7 @@ public class ModBlocks {
                     .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
-                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .blockstate((c, p) -> {})
                     .simpleItem()
                     .register();
 
@@ -192,8 +211,48 @@ public class ModBlocks {
                     .transform(BuilderTransformers.bearing("windmill", "gearbox"))
                     .properties(p -> p.strength(0.8f))
                     .transform(axeOrPickaxe())
-                    .blockstate((c, p) -> p.directionalBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .simpleItem()
+                    .register();
+
+    public static final BlockEntry<WarpDriveBlock> WARP_DRIVE_BLOCK =
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))).block("warp_drive", WarpDriveBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .transform(BuilderTransformers.bearing("windmill", "gearbox"))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .transform(ModernTechStress.setImpact(128.0))
+                    .simpleItem()
+                    .register();
+
+    public static final BlockEntry<WarpAmplifierBlock> WARP_AMPLIFIER_BLOCK =
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))).block("warp_amplifier", WarpAmplifierBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .transform(BuilderTransformers.bearing("windmill", "gearbox"))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .transform(ModernTechStress.setImpact(8.0))
+                    .simpleItem()
+                    .register();
+
+    public static final BlockEntry<Block> YTTERBIUM_ORE =
+            REGISTRATE.block("ytterbium_ore", Block::new)
+                    .transform(pickaxeOnly())
+                    .simpleItem()
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .register();
+
+    public static final BlockEntry<Block> MYSTERIOUS_ORE =
+            REGISTRATE.block("mysterious_ore", Block::new)
+                    .transform(pickaxeOnly())
+                    .simpleItem()
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .register();
 
     public static final BlockEntry<VerticalLensBlock> LENS_1X = registerLens("lens_1x");
@@ -212,15 +271,15 @@ public class ModBlocks {
     public static final BlockEntry<AngledLensExtensionBlock> ANGLED_LENS_EXTENSION = REGISTRATE.block("angled_lens_extension", AngledLensExtensionBlock::new)
             .initialProperties(SharedProperties::softMetal)
             .properties(p -> p.noOcclusion().strength(0.5f))
-            .transform(axeOrPickaxe())
-            .blockstate((c, p) -> p.directionalBlock(c.getEntry(),AssetLookup.standardModel(c, p)))
+            .transform(pickaxeOnly())
+            .blockstate((c, p) -> {})
             .simpleItem()
             .register();
     public static final BlockEntry<VerticalAngledLensExtensionBlock> VERTICAL_ANGLED_LENS_EXTENSION = REGISTRATE.block("vertical_angled_lens_extension", VerticalAngledLensExtensionBlock::new)
             .initialProperties(SharedProperties::softMetal)
             .properties(p -> p.noOcclusion().strength(0.5f))
-            .transform(axeOrPickaxe())
-            .blockstate((c, p) -> p.directionalBlock(c.getEntry(),AssetLookup.standardModel(c, p)))
+            .transform(pickaxeOnly())
+            .blockstate((c, p) -> {})
             .simpleItem()
             .register();
 
@@ -228,8 +287,8 @@ public class ModBlocks {
         return REGISTRATE.block(name, LensExtensionBlock::new)
                 .initialProperties(SharedProperties::softMetal)
                 .properties(p -> p.noOcclusion().strength(0.5f))
-                .transform(axeOrPickaxe())
-                .blockstate((c, p) -> p.directionalBlock(c.getEntry(), p.models().getExistingFile(p.modLoc("block/" + name))))
+                .transform(pickaxeOnly())
+                .blockstate((c, p) -> {})
                 .simpleItem()
                 .register();
     }
@@ -238,8 +297,8 @@ public class ModBlocks {
         return REGISTRATE.block(name, VerticalLensBlock::new)
                 .initialProperties(SharedProperties::softMetal)
                 .properties(p -> p.noOcclusion().strength(0.5f))
-                .transform(axeOrPickaxe())
-                .blockstate((c, p) -> p.directionalBlock(c.getEntry(), p.models().getExistingFile(p.modLoc("block/" + name))))
+                .transform(pickaxeOnly())
+                .blockstate((c, p) -> {})
                 .simpleItem()
                 .register();
     }

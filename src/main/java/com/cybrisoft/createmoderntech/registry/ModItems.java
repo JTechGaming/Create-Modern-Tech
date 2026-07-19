@@ -11,6 +11,7 @@ import static com.cybrisoft.createmoderntech.CreateModernTech.REGISTRATE;
 public class ModItems {
     public static final ItemEntry<BeaconCompassItem> BEACON_COMPASS =
             REGISTRATE.item("beacon_compass", BeaconCompassItem::new)
+                    .model((c, p) -> {})
                     .register();
 
     public static final ItemEntry<Item> AI_PROCESSOR =
@@ -30,7 +31,37 @@ public class ModItems {
                     .register();
     public static final ItemEntry<AdjustableSpyglassItem> ADJUSTABLE_SPYGLASS =
             REGISTRATE.item("adjustable_spyglass", AdjustableSpyglassItem::new)
+                    .model((c, p) -> {})
                     .register();
+
+    public static final ItemEntry<Item> RAW_YTTERBIUM =
+            REGISTRATE.item("raw_ytterbium", Item::new)
+                    .register();
+    public static final ItemEntry<Item> YTTERBIUM_INGOT =
+            REGISTRATE.item("ytterbium_ingot", Item::new)
+                    .register();
+    public static final ItemEntry<Item> YTTERBIUM_NUGGET =
+            REGISTRATE.item("ytterbium_nugget", Item::new)
+                    .register();
+    public static final ItemEntry<Item> PURIFIED_YTTERBIUM_NUGGET =
+            REGISTRATE.item("purified_ytterbium_nugget", Item::new)
+                    .register();
+    public static final ItemEntry<Item> YTTERBIUM_SHEET =
+            REGISTRATE.item("ytterbium_sheet", Item::new)
+                    .register();
+    public static final ItemEntry<Item> HIGH_FREQUENCY_PLATING =
+            REGISTRATE.item("high_frequency_plating", Item::new)
+                    .register();
+    public static final ItemEntry<Item> MYSTERIOUS_CRYSTAL =
+            REGISTRATE.item("mysterious_crystal", Item::new)
+                    .register();
+    public static final ItemEntry<Item> RAW_MYSTERIOUS_CRYSTAL =
+            REGISTRATE.item("raw_mysterious_crystal", Item::new)
+                    .register();
+    public static final ItemEntry<Item> ROUGH_MYSTERIOUS_CRYSTAL =
+            REGISTRATE.item("rough_mysterious_crystal", Item::new)
+                    .register();
+
 
     public static void register() {
         CreateModernTech.getLogger().info("Registering Items!");

@@ -1,0 +1,38 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    },
+    {
+      "item": "createmoderntech:purified_ytterbium_nugget"
+    }
+  ],
+  "results": [
+    {
+      "id": "createmoderntech:ytterbium_ingot"
+    }
+  ]
+}

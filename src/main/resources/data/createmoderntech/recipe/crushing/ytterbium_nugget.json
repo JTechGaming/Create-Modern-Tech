@@ -1,0 +1,27 @@
+{
+  "type": "create:crushing",
+  "ingredients": [
+    { "item": "createmoderntech:raw_ytterbium" }
+  ],
+  "results": [
+    {
+      "count": 1,
+      "id": "minecraft:blackstone"
+    },
+    {
+      "id": "createmoderntech:ytterbium_nugget",
+      "count": 1
+    },
+    {
+      "id": "createmoderntech:ytterbium_nugget",
+      "count": 1,
+      "chance": 0.5
+    },
+    {
+      "id": "createmoderntech:ytterbium_nugget",
+      "count": 1,
+      "chance": 0.1
+    }
+  ],
+  "processingTime": 250
+}

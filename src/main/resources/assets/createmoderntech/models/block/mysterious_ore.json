@@ -1,0 +1,7 @@
+{
+    "parent": "minecraft:block/cube_column",
+    "textures": {
+        "end": "createmoderntech:block/mysterious_ore",
+        "side": "createmoderntech:block/mysterious_ore"
+    }
+}

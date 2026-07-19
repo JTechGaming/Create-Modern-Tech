@@ -1,0 +1,108 @@
+{
+  "variants": {
+    "facing=down,powered_bottom=false,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 180
+    },
+    "facing=down,powered_bottom=false,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 180
+    },
+    "facing=down,powered_bottom=true,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 180
+    },
+    "facing=down,powered_bottom=true,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 180
+    },
+    "facing=east,powered_bottom=false,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,powered_bottom=false,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,powered_bottom=true,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,powered_bottom=true,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,powered_bottom=false,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90
+    },
+    "facing=north,powered_bottom=false,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90
+    },
+    "facing=north,powered_bottom=true,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90
+    },
+    "facing=north,powered_bottom=true,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90
+    },
+    "facing=south,powered_bottom=false,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,powered_bottom=false,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,powered_bottom=true,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,powered_bottom=true,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,powered_bottom=false,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller"
+    },
+    "facing=up,powered_bottom=false,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller"
+    },
+    "facing=up,powered_bottom=true,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller"
+    },
+    "facing=up,powered_bottom=true,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller"
+    },
+    "facing=west,powered_bottom=false,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,powered_bottom=false,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,powered_bottom=true,powered_top=false": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,powered_bottom=true,powered_top=true": {
+      "model": "createmoderntech:block/beacon_controller",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

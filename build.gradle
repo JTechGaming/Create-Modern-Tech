@@ -19,6 +19,18 @@ repositories {
     maven { url = "https://maven.createmod.net" } // Create, Ponder, Flywheel
     maven { url = "https://maven.ithundxr.dev/snapshots" } // Registrate
 
+    exclusiveContent { // ImGuiMC
+        forRepository {
+            maven {
+                url = "https://maven.ryanhcode.dev/releases"
+                name = "RyanHCode Maven"
+            }
+        }
+        filter {
+            includeGroup("foundry.imguimc")
+        }
+    }
+
     maven {
         name = 'BlameJared'
         url = 'https://maven.blamejared.com'
@@ -158,6 +170,9 @@ dependencies {
     }
     localRuntime("dev.ryanhcode.sable:sable-neoforge-${minecraft_version}:${sable_version}")
 
+    // Veil imgui
+    implementation("foundry.imguimc:imguimc-neoforge-${project.minecraft_version}:${project.imguimc_version}")
+
     //Simulated
     compileOnly("dev.simulated_team.simulated:simulated-neoforge-${minecraft_version}:${simulated_version}")
     localRuntime("dev.simulated_team.simulated:simulated-neoforge-${minecraft_version}:${simulated_version}")
@@ -183,14 +198,6 @@ dependencies {
     implementation files('libs/jadapter-for-native-tts-fixed.jar')
 }
 
-tasks.named('processResources') {
-    dependsOn extractFreeTTS
-}
-
-tasks.named('classes') {
-    dependsOn extractFreeTTS
-}
-
 tasks.register('extractFreeTTS', Copy) {
     from {
         fileTree('libs').filter {
@@ -203,6 +210,15 @@ tasks.register('extractFreeTTS', Copy) {
     into layout.buildDirectory.dir('classes/java/main')
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     exclude 'META-INF/**'
+}
+
+tasks.named('processResources') {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn extractFreeTTS
+}
+
+tasks.named('classes') {
+    dependsOn extractFreeTTS
 }
 
 tasks.named('compileJava') {

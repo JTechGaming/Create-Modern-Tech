@@ -5,6 +5,7 @@ import com.cybrisoft.createmoderntech.block.aicore.AICoreBlockEntity;
 import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockEntity;
 import com.cybrisoft.createmoderntech.block.gauge.RegionalStressGaugeBlockEntity;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
+import com.cybrisoft.createmoderntech.block.springbuffer.SpringBufferBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanXControllerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.pan.PanZControllerBlockEntity;
@@ -14,9 +15,12 @@ import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconC
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayRenderer;
 import com.cybrisoft.createmoderntech.block.volumetric.shaft.VolumetricShaftBlockEntity;
-import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTerminalBlockEntity;
-import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTerminalRenderer;
-import com.cybrisoft.createmoderntech.block.warpgate.WarpGateTransponderBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.amplifier.WarpAmplifierBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.amplifier.WarpAmplifierRenderer;
+import com.cybrisoft.createmoderntech.block.warpgate.drive.WarpDriveBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.termimal.WarpGateTerminalBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.termimal.WarpGateTerminalRenderer;
+import com.cybrisoft.createmoderntech.block.warpgate.transponder.WarpGateTransponderBlockEntity;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
 import com.simibubi.create.content.kinetics.base.ShaftRenderer;
@@ -72,6 +76,12 @@ public class ModBlockEntityTypes {
             .validBlocks(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK)
             .register();
 
+    public static final BlockEntityEntry<SpringBufferBlockEntity> SPRING_BUFFER = REGISTRATE
+            .blockEntity("spring_buffer", SpringBufferBlockEntity::new)
+            .visual(() -> ShaftVisual::new)
+            .validBlocks(ModBlocks.SPRING_BUFFER_BLOCK)
+            .register();
+
     public static final BlockEntityEntry<SpeakerBlockEntity> SPEAKER = REGISTRATE
             .blockEntity("speaker", SpeakerBlockEntity::new)
             .validBlocks(ModBlocks.SPEAKER_BLOCK)
@@ -89,7 +99,7 @@ public class ModBlockEntityTypes {
 
     public static final BlockEntityEntry<WarpGateTransponderBlockEntity> WARP_GATE_TRANSPONDER = REGISTRATE
             .blockEntity("warp_gate_transponder", WarpGateTransponderBlockEntity::new)
-            .visual(() -> OrientedRotatingVisual.of(AllPartialModels.SHAFT_HALF))
+            .visual(() -> ShaftVisual::new)
             .validBlocks(ModBlocks.WARP_GATE_TRANSPONDER_BLOCK)
             .register();
 
@@ -97,6 +107,19 @@ public class ModBlockEntityTypes {
             .blockEntity("warp_gate_terminal", WarpGateTerminalBlockEntity::new)
             .validBlocks(ModBlocks.WARP_GATE_TERMINAL_BLOCK)
             .renderer(() -> WarpGateTerminalRenderer::new)
+            .register();
+
+    public static final BlockEntityEntry<WarpDriveBlockEntity> WARP_DRIVE = REGISTRATE
+            .blockEntity("warp_drive", WarpDriveBlockEntity::new)
+            .visual(() -> ShaftVisual::new)
+            .validBlocks(ModBlocks.WARP_DRIVE_BLOCK)
+            .register();
+
+    public static final BlockEntityEntry<WarpAmplifierBlockEntity> WARP_AMPLIFIER = REGISTRATE
+            .blockEntity("warp_amplifier", WarpAmplifierBlockEntity::new)
+            .visual(() -> ShaftVisual::new)
+            .renderer(() -> WarpAmplifierRenderer::new)
+            .validBlocks(ModBlocks.WARP_AMPLIFIER_BLOCK)
             .register();
 
     public static void register() {

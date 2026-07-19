@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "createmoderntech:item/purified_ytterbium_nugget"
+  }
+}

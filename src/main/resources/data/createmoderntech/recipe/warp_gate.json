@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "C": { "item": "create:brass_casing" },
+    "P": { "item": "createmoderntech:high_frequency_plating" },
+    "L": { "item": "createmoderntech:lens_fragment" }
+  },
+  "pattern": [
+    "PLP",
+    "PCP",
+    "PLP"
+  ],
+  "result": { "id": "createmoderntech:warp_gate" },
+  "show_notification": true
+}

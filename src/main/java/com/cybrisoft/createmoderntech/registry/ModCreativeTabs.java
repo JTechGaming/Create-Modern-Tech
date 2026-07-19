@@ -78,6 +78,8 @@ public class ModCreativeTabs {
 
         pOutput.accept(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK);
 
+        pOutput.accept(ModBlocks.SPRING_BUFFER_BLOCK);
+
         pOutput.accept(ModBlocks.SPEAKER_BLOCK);
         pOutput.accept(ModBlocks.AUDIO_TRIGGER_BLOCK);
         pOutput.accept(ModBlocks.AI_CORE_BLOCK);
@@ -85,6 +87,11 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.WARP_GATE_BLOCK);
         pOutput.accept(ModBlocks.WARP_GATE_TERMINAL_BLOCK);
         pOutput.accept(ModBlocks.WARP_GATE_TRANSPONDER_BLOCK);
+        pOutput.accept(ModBlocks.WARP_DRIVE_BLOCK);
+        pOutput.accept(ModBlocks.WARP_AMPLIFIER_BLOCK);
+
+        pOutput.accept(ModBlocks.YTTERBIUM_ORE);
+        pOutput.accept(ModBlocks.MYSTERIOUS_ORE);
 
         pOutput.accept(ModItems.BEACON_COMPASS);
         pOutput.accept(ModItems.ADJUSTABLE_SPYGLASS);
@@ -94,6 +101,17 @@ public class ModCreativeTabs {
         pOutput.accept(ModItems.OPTICAL_DRIVE);
         pOutput.accept(ModItems.DIAPHRAGM);
         pOutput.accept(ModItems.MEMBRANE);
+
+        pOutput.accept(ModItems.RAW_YTTERBIUM);
+        pOutput.accept(ModItems.YTTERBIUM_INGOT);
+        pOutput.accept(ModItems.YTTERBIUM_NUGGET);
+        pOutput.accept(ModItems.PURIFIED_YTTERBIUM_NUGGET);
+        pOutput.accept(ModItems.YTTERBIUM_SHEET);
+        pOutput.accept(ModItems.HIGH_FREQUENCY_PLATING);
+
+        pOutput.accept(ModItems.RAW_MYSTERIOUS_CRYSTAL);
+        pOutput.accept(ModItems.ROUGH_MYSTERIOUS_CRYSTAL);
+        pOutput.accept(ModItems.MYSTERIOUS_CRYSTAL);
     }
 
 

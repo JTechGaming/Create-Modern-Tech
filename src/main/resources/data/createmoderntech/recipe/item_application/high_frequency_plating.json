@@ -1,0 +1,17 @@
+
+{
+  "type": "create:item_application",
+  "ingredients": [
+    {
+      "item": "createmoderntech:ytterbium_sheet"
+    },
+    {
+      "item": "create:sturdy_sheet"
+    }
+  ],
+  "results": [
+    {
+      "id": "createmoderntech:high_frequency_plating"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "vertex": "createmoderntech:warpgate",
+  "fragment": "createmoderntech:warp_amplifier_beam",
+  "uniforms": [
+    { "name": "Time", "type": "float" }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "variants": {
+    "segment=v": {
+      "model": "createmoderntech:block/warp_gate/vertical"
+    },
+    "segment=h_x": {
+      "model": "createmoderntech:block/warp_gate/horizontal",
+      "y": 90
+    },
+    "segment=h_z": {
+      "model": "createmoderntech:block/warp_gate/horizontal"
+    },
+    "segment=d_x_up": {
+      "model": "createmoderntech:block/warp_gate/diagonal",
+      "y": 90
+    },
+    "segment=d_x_down": {
+      "model": "createmoderntech:block/warp_gate/diagonal",
+      "y": 270
+    },
+    "segment=d_z_up": {
+      "model": "createmoderntech:block/warp_gate/diagonal"
+    },
+    "segment=d_z_down": {
+      "model": "createmoderntech:block/warp_gate/diagonal",
+      "y": 180
+    }
+  }
+}

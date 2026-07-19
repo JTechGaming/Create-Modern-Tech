@@ -1,7 +1,6 @@
 package com.cybrisoft.createmoderntech;
 
 import com.cybrisoft.createmoderntech.client.BeaconCompassClientEvents;
-import com.cybrisoft.createmoderntech.client.ClientModEvents;
 import com.cybrisoft.createmoderntech.compat.VanillaTriggerVarProviders;
 import com.cybrisoft.createmoderntech.compat.create.CreateTriggerVarProviders;
 import com.cybrisoft.createmoderntech.compat.simulated.SimulatedTriggerVarProviders;
@@ -59,6 +58,7 @@ public class CreateModernTech {
         ModBlockEntityTypes.register();
         ModCreativeTabs.register(modEventBus);
         ModPackets.register(modEventBus);
+        ModSounds.register(modEventBus);
 
         ModernTechAllConfigs.register(ModLoadingContext.get(), modContainer);
 

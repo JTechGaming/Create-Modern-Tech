@@ -2,14 +2,16 @@ package com.cybrisoft.createmoderntech.client;
 
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockEntity;
 import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
-import com.cybrisoft.createmoderntech.network.HeightmapDataPacket;
-import com.cybrisoft.createmoderntech.network.OpenAudioTriggerScreenPacket;
-import com.cybrisoft.createmoderntech.network.PlaySpeakerPacket;
-import com.cybrisoft.createmoderntech.network.RequestHeightmapPacket;
+import com.cybrisoft.createmoderntech.network.*;
+import com.cybrisoft.createmoderntech.registry.ModSounds;
 import com.cybrisoft.createmoderntech.tts.FreeTTSEngine;
 import com.cybrisoft.createmoderntech.ui.AudioTriggerScreen;
+import dev.ryanhcode.sable.companion.SableCompanion;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
@@ -59,6 +61,32 @@ public class ClientPacketHandlers {
                 be.vboDirty = true;
                 be.lastCacheUpdate = 0;
             }
+        });
+    }
+
+    public static void handleStart(StartWarpTransitionPacket packet, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                WarpTransitionRenderer.sublevel = SableCompanion.INSTANCE.getTrackingOrVehicleSubLevel(mc.player);
+            }
+            WarpTransitionRenderer.shouldRender = true;
+            WarpTransitionRenderer.travelDirection = packet.velocity().normalize();
+            WarpTransitionRenderer.ramping = true;
+            WarpTransitionRenderer.transitionProgress = 0f;
+
+            Player player = Minecraft.getInstance().player;
+            if (player == null) return;
+            Level level = player.level();
+
+            level.playLocalSound(player, ModSounds.WARP_TRANSITION.get(), SoundSource.AMBIENT, 8.0f, 1.0f);
+            level.playLocalSound(player, ModSounds.WARP_AMBIANCE.get(), SoundSource.AMBIENT, 8.0f, 1.0f);
+        });
+    }
+
+    public static void handleEnd(EndWarpTransitionPacket packet, IPayloadContext ctx) {
+        ctx.enqueueWork(() -> {
+            WarpTransitionRenderer.ramping = false;
         });
     }
 

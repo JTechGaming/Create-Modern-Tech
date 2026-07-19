@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "facing=down,regional_stress_supplier=false": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 180
+    },
+    "facing=down,regional_stress_supplier=true": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 180
+    },
+    "facing=east,regional_stress_supplier=false": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east,regional_stress_supplier=true": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north,regional_stress_supplier=false": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90
+    },
+    "facing=north,regional_stress_supplier=true": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90
+    },
+    "facing=south,regional_stress_supplier=false": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90,
+      "y": 180
+    },
+    "facing=south,regional_stress_supplier=true": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up,regional_stress_supplier=false": {
+      "model": "createmoderntech:block/regional_stress_gauge"
+    },
+    "facing=up,regional_stress_supplier=true": {
+      "model": "createmoderntech:block/regional_stress_gauge"
+    },
+    "facing=west,regional_stress_supplier=false": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90,
+      "y": 270
+    },
+    "facing=west,regional_stress_supplier=true": {
+      "model": "createmoderntech:block/regional_stress_gauge",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

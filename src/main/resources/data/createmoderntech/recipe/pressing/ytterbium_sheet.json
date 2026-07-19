@@ -1,0 +1,13 @@
+{
+  "type": "create:pressing",
+  "ingredients": [
+    {
+      "item": "createmoderntech:ytterbium_ingot"
+    }
+  ],
+  "results": [
+    {
+      "id": "createmoderntech:ytterbium_sheet"
+    }
+  ]
+}

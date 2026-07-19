@@ -2,6 +2,8 @@
   "vertex": "createmoderntech:warpgate",
   "fragment": "createmoderntech:warpgate",
   "uniforms": [
-    { "name": "Time", "type": "float" }
+    { "name": "Time", "type": "float" },
+    { "name": "Progress", "type": "float" },
+    { "name": "Closing", "type": "float" }
   ]
 }

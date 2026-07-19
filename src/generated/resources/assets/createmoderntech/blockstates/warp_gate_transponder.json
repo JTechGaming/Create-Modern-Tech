@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "createmoderntech:block/warp_gate_transponder"
+    }
+  }
+}

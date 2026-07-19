@@ -42,17 +42,27 @@ public class ModPackets {
         registrar.playToClient(
                 OpenAudioTriggerScreenPacket.TYPE,
                 OpenAudioTriggerScreenPacket.CODEC,
-                (packet, ctx) -> ClientPacketHandlers.handleOpenAudioTriggerScreen(packet, ctx)
+                ClientPacketHandlers::handleOpenAudioTriggerScreen
         );
         registrar.playToClient(
                 PlaySpeakerPacket.TYPE,
                 PlaySpeakerPacket.CODEC,
-                (packet, ctx) -> ClientPacketHandlers.handlePlaySpeaker(packet, ctx)
+                ClientPacketHandlers::handlePlaySpeaker
         );
         registrar.playToClient(
                 HeightmapDataPacket.TYPE,
                 HeightmapDataPacket.CODEC,
-                (packet, ctx) -> ClientPacketHandlers.handleHeightmapData(packet, ctx)
+                ClientPacketHandlers::handleHeightmapData
+        );
+        registrar.playToClient(
+                StartWarpTransitionPacket.TYPE,
+                StartWarpTransitionPacket.CODEC,
+                ClientPacketHandlers::handleStart
+        );
+        registrar.playToClient(
+                EndWarpTransitionPacket.TYPE,
+                EndWarpTransitionPacket.CODEC,
+                ClientPacketHandlers::handleEnd
         );
     }
 
