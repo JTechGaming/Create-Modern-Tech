@@ -3,14 +3,11 @@
   "accept_mirrored": false,
   "category": "misc",
   "key": {
-    "O": {
-      "item": "createmoderntech:optical_drive"
-    },
     "C": {
-      "item": "createmoderntech:mysterious_crystal"
+      "item": "create:cog"
     },
-    "L": {
-      "item": "createmoderntech:lens_element"
+    "S": {
+      "item": "create:shaft"
     },
     "P": {
       "item": "createmoderntech:high_frequency_plating"
@@ -21,23 +18,20 @@
     "E": {
       "item": "create:electron_tube"
     },
-    "R": {
-      "item": "simulated:laser_pointer"
-    },
-    "M": {
-      "item": "create:precision_mechanism"
+    "T": {
+      "item": "create:transmitter"
     }
   },
   "pattern": [
-    "PPLPP",
-    "PEOEP",
-    "PBCBP",
-    "PEREP",
-    "PPMPP"
+    "PBSBP",
+    "BETEB",
+    "PTCTP",
+    "BETEB",
+    "PBSBP"
   ],
   "result": {
     "count": 1,
-    "id": "createmoderntech:warp_drive"
+    "id": "createmoderntech:warp_transponder"
   },
   "show_notification": false
 }

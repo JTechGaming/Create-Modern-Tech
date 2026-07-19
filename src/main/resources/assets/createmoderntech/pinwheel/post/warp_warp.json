@@ -1,0 +1,10 @@
+{
+  "stages": [
+    {
+      "type": "veil:blit",
+      "shader": "createmoderntech:warp_warp",
+      "in": "minecraft:main",
+      "out": "veil:post"
+    }
+  ]
+}

@@ -56,10 +56,6 @@ public class WarpGateTerminalBlockEntity extends SmartBlockEntity {
         );
     }
 
-    // todo implement transponder rotational force requirements
-    // todo add ponders to warp gate and ai systems
-    // todo add crafting recipes for warp gate blocks, so add new crafting materials as well
-
     public float activationProgress = 0f;
     public float closing = 0f;
     private static final float ACTIVATION_SPEED = 0.1f;
@@ -130,10 +126,10 @@ public class WarpGateTerminalBlockEntity extends SmartBlockEntity {
 
             if (!wasClosed && activationProgress == 1f) {
                 wasClosed = true;
-                level.playSound(null, worldPosition, ModSounds.PORTAL_CLOSE.get(), SoundSource.AMBIENT, 8.0f, 1.0f);
+                level.playSound(null, worldPosition, ModSounds.PORTAL_CLOSE.get(), SoundSource.AMBIENT, 2.0f, 1.0f);
             }
             if (!wasOn) {
-                level.playSound(null, worldPosition, ModSounds.PORTAL_ACTIVATE.get(), SoundSource.AMBIENT, 8.0f, 1.0f);
+                level.playSound(null, worldPosition, ModSounds.PORTAL_ACTIVATE.get(), SoundSource.AMBIENT, 2.0f, 1.0f);
             }
         } else {
             closing = 1f;

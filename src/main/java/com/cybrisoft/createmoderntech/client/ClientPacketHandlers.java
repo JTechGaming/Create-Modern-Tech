@@ -73,7 +73,8 @@ public class ClientPacketHandlers {
             WarpTransitionRenderer.shouldRender = true;
             WarpTransitionRenderer.travelDirection = packet.velocity().normalize();
             WarpTransitionRenderer.ramping = true;
-            WarpTransitionRenderer.transitionProgress = 0f;
+            WarpTransitionRenderer.transitionProgress = 0.0f;
+            WarpTransitionRenderer.delay = WarpTransitionRenderer.tickDelay;
 
             Player player = Minecraft.getInstance().player;
             if (player == null) return;
@@ -86,6 +87,7 @@ public class ClientPacketHandlers {
 
     public static void handleEnd(EndWarpTransitionPacket packet, IPayloadContext ctx) {
         ctx.enqueueWork(() -> {
+            WarpTransitionRenderer.shouldRender = false;
             WarpTransitionRenderer.ramping = false;
         });
     }

@@ -3,9 +3,6 @@
   "accept_mirrored": false,
   "category": "misc",
   "key": {
-    "O": {
-      "item": "createmoderntech:optical_drive"
-    },
     "C": {
       "item": "createmoderntech:mysterious_crystal"
     },
@@ -18,26 +15,20 @@
     "B": {
       "item": "create:railway_casing"
     },
-    "E": {
-      "item": "create:electron_tube"
-    },
-    "R": {
-      "item": "simulated:laser_pointer"
-    },
-    "M": {
-      "item": "create:precision_mechanism"
+    "S": {
+      "item": "create:shaft"
     }
   },
   "pattern": [
     "PPLPP",
-    "PEOEP",
-    "PBCBP",
-    "PEREP",
-    "PPMPP"
+    " BSB ",
+    " BCB ",
+    " BSB ",
+    "PPLPP"
   ],
   "result": {
     "count": 1,
-    "id": "createmoderntech:warp_drive"
+    "id": "createmoderntech:warp_amplifier"
   },
   "show_notification": false
 }

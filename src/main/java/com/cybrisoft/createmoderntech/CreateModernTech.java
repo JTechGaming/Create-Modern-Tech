@@ -47,6 +47,8 @@ public class CreateModernTech {
                     new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
                             .andThen(TooltipModifier.mapNull(KineticStats.create(item))));
 
+    private static final ResourceLocation WARP_WARP_SHADER = ResourceLocation.fromNamespaceAndPath(CreateModernTech.MODID, "warp_warp");
+
     public CreateModernTech(IEventBus modEventBus, ModContainer modContainer) {
         getLogger().info("Initializing Create: Modern Tech!");
 

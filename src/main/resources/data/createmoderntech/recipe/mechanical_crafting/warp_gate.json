@@ -1,0 +1,28 @@
+{
+  "type": "create:mechanical_crafting",
+  "accept_mirrored": false,
+  "category": "misc",
+  "key": {
+    "L": {
+      "item": "createmoderntech:lens_element"
+    },
+    "P": {
+      "item": "createmoderntech:high_frequency_plating"
+    },
+    "B": {
+      "item": "create:railway_casing"
+    }
+  },
+  "pattern": [
+    "P L P",
+    " B B ",
+    "P   P",
+    " B B ",
+    "P L P"
+  ],
+  "result": {
+    "count": 1,
+    "id": "createmoderntech:warp_gate"
+  },
+  "show_notification": false
+}

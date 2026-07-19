@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "createmoderntech:item/raw_mysterious_crystal"
+  }
+}

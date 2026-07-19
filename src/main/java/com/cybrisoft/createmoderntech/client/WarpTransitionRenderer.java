@@ -60,6 +60,8 @@ public class WarpTransitionRenderer {
     private static Vec3 targetVisualCenter = null;
     private static Vec3 currentVisualCenter = null;
     private static final float LERP_SPEED = 0.1f;
+    public static final int tickDelay = 10;
+    public static int delay = 0;
 
     @SubscribeEvent
     public static void onClientTick(ClientTickEvent.Post event) {
@@ -67,19 +69,18 @@ public class WarpTransitionRenderer {
 
         if (Minecraft.getInstance().player != null) {
             targetVisualCenter = Minecraft.getInstance().player.position();
+            if (delay > 0) currentVisualCenter = targetVisualCenter;
+            delay = Math.max(0, delay - 1);
             if (currentVisualCenter == null) currentVisualCenter = targetVisualCenter;
             currentVisualCenter = currentVisualCenter.add(
                     targetVisualCenter.subtract(currentVisualCenter).scale(LERP_SPEED));
         }
 
         if (ramping) {
-            transitionProgress = Math.min(1f, transitionProgress + 0.02f);
+            transitionProgress = Math.min(6f, transitionProgress + 0.04f);
         } else {
-            transitionProgress = Math.max(0f, transitionProgress - 0.05f);
-            if (transitionProgress <= 0f) {
-                shouldRender = false;
-                sublevel = null;
-            }
+            shouldRender = false;
+            sublevel = null;
         }
     }
 
@@ -100,7 +101,6 @@ public class WarpTransitionRenderer {
 
         if (currentVisualCenter == null && Minecraft.getInstance().player != null) currentVisualCenter = Minecraft.getInstance().player.position();
 
-        //renderTunnel(ms, vc, visualCenter);
         for (int i = 0; i < STREAK_COUNT; i++) {
             Vec3 origin = STREAK_ORIGINS[i].add(currentVisualCenter);
             renderStreak(ms, vc, origin, transitionProgress, travelDirection, i);
@@ -108,48 +108,6 @@ public class WarpTransitionRenderer {
 
         bufferSource.endBatch(RenderType.translucent());
         ms.popPose();
-    }
-
-    private static void renderTunnel(PoseStack ms, VertexConsumer vc, Vec3 visualCenter) {
-        BoundingBox3dc bb = sublevel.boundingBox();
-
-        // compute half extents from bounding box size
-        float halfX = (float)(bb.maxX() - bb.minX()) / 2f + 2f;
-        float halfY = (float)(bb.maxY() - bb.minY()) / 2f + 2f;
-        float halfZ = (float)(bb.maxZ() - bb.minZ()) / 2f + 2f;
-
-        float cx = (float) visualCenter.x;
-        float cy = (float) visualCenter.y;
-        float cz = (float) visualCenter.z;
-
-        float minX = cx - halfX, maxX = cx + halfX;
-        float minY = cy - halfY, maxY = cy + halfY;
-        float minZ = cz - halfZ, maxZ = cz + halfZ;
-
-        float r = 0.02f, g = 0.02f, b = 0.05f, a = 0.95f;
-
-        // bottom
-        quadVC(ms, vc, minX,minY,minZ, maxX,minY,minZ, maxX,minY,maxZ, minX,minY,maxZ, r,g,b,a);
-        // top
-        quadVC(ms, vc, minX,maxY,minZ, minX,maxY,maxZ, maxX,maxY,maxZ, maxX,maxY,minZ, r,g,b,a);
-        // north
-        quadVC(ms, vc, minX,minY,minZ, minX,maxY,minZ, maxX,maxY,minZ, maxX,minY,minZ, r,g,b,a);
-        // south
-        quadVC(ms, vc, minX,minY,maxZ, maxX,minY,maxZ, maxX,maxY,maxZ, minX,maxY,maxZ, r,g,b,a);
-        // west
-        quadVC(ms, vc, minX,minY,minZ, minX,minY,maxZ, minX,maxY,maxZ, minX,maxY,minZ, r,g,b,a);
-        // east
-        quadVC(ms, vc, maxX,minY,minZ, maxX,maxY,minZ, maxX,maxY,maxZ, maxX,minY,maxZ, r,g,b,a);
-    }
-
-    private static void quadVC(PoseStack ms, VertexConsumer vc,
-                               float x1, float y1, float z1, float x2, float y2, float z2,
-                               float x3, float y3, float z3, float x4, float y4, float z4,
-                               float r, float g, float b, float a) {
-        vc.addVertex(ms.last().pose(), x1, y1, z1).setColor(r, g, b, a);
-        vc.addVertex(ms.last().pose(), x2, y2, z2).setColor(r, g, b, a);
-        vc.addVertex(ms.last().pose(), x3, y3, z3).setColor(r, g, b, a);
-        vc.addVertex(ms.last().pose(), x4, y4, z4).setColor(r, g, b, a);
     }
 
     private static void renderStreak(PoseStack ms, VertexConsumer vc, Vec3 origin,

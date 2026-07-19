@@ -14,10 +14,11 @@ import dev.ryanhcode.sable.companion.SubLevelAccess;
 import dev.ryanhcode.sable.companion.math.BoundingBox3dc;
 import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -44,6 +45,7 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
     public volatile boolean readyToTeleport = false;
     public volatile boolean stagingTeleport = false;
     public volatile Vec3 stagingPosition = null;
+    public volatile Quaterniondc stagingOrientation = null;
     public int warpCooldown = 0;
     private int warpTransitionTicks = 0;
     private List<Player> travelingPlayers = new ArrayList<>();
@@ -109,7 +111,7 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
                         sourceIsZ = be.multiblockIsZ;
                         destIsZ = pair.multiblockIsZ;
                         warpCooldown = 20;
-                        warpTransitionTicks = 200;
+                        warpTransitionTicks = 180;
                         stagingTeleport = true;
                         stagingPosition = be.getBlockPos().getCenter().add(0, 2000, 0);
 
@@ -118,6 +120,7 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
                             for (Player player : level.players()) {
                                 SubLevelAccess playerSubLevel = SableCompanion.INSTANCE.getTrackingOrVehicleSubLevel(player);
                                 if (playerSubLevel != null && playerSubLevel.getUniqueId().equals(sublevel.getUniqueId())) {
+                                    player.addEffect(new MobEffectInstance(MobEffects.DARKNESS, 170, 1, true, false, false));
                                     travelingPlayers.add(player);
                                     PacketDistributor.sendToPlayer((ServerPlayer) player,
                                             new StartWarpTransitionPacket(sublevel.getUniqueId(), velocity));
@@ -177,16 +180,29 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
     public void sable$physicsTick(ServerSubLevel subLevel, RigidBodyHandle handle, double timeStep) {
         BlockEntitySubLevelActor.super.sable$physicsTick(subLevel, handle, timeStep);
 
-        if (stagingTeleport) {
-            // teleport 2000 blocks up, keep orientation
+        if (stagingTeleport && !readyToTeleport) {
+            // teleport 2000 blocks up
+            if (stagingOrientation == null) {
+                stagingOrientation = new Quaterniond(subLevel.logicalPose().orientation());
+            }
+
             Vector3d currentPos = new Vector3d(stagingPosition.x, stagingPosition.y, stagingPosition.z);
-            handle.teleport(currentPos, subLevel.logicalPose().orientation());
+
+            Vector3d angVel = handle.getAngularVelocity(new Vector3d());
+            handle.addLinearAndAngularVelocity(
+                    new Vector3d(0, 0, 0),
+                    new Vector3d(-angVel.x, -angVel.y, -angVel.z)
+            );
+
+            handle.teleport(currentPos, stagingOrientation);
 
             fixBranchingPlayers(subLevel.getLevel());
         }
 
         if (warpPosition != null && readyToTeleport) {
             stagingTeleport = false;
+            stagingOrientation = null;
+            stagingPosition = null;
             readyToTeleport = false;
             Quaterniondc currentOrientation = subLevel.logicalPose().orientation();
             Quaterniondc newOrientation = currentOrientation;
@@ -235,7 +251,7 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
             if (playerSL == null) {
                 // Player is no longer on the sublevel
                 System.out.println("Player supposedly left sublevel");
-                //level.getServer().execute(() -> player.teleportTo(safePos.x, safePos.y, safePos.z));
+                level.getServer().execute(() -> player.teleportTo(safePos.x, safePos.y, safePos.z));
             }
         }
     }

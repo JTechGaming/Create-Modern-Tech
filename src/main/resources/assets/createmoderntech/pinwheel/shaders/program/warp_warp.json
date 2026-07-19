@@ -1,0 +1,9 @@
+{
+  "vertex": "veil:blit_screen",
+  "fragment": "createmoderntech:warp_warp",
+  "uniforms": [
+    { "name": "GateScreenPos", "type": "vec2" },
+    { "name": "WarpStrength", "type": "float" },
+    { "name": "WarpRadius", "type": "float" }
+  ]
+}

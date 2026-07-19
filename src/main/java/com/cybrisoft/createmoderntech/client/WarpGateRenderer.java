@@ -8,6 +8,8 @@ import com.mojang.blaze3d.vertex.*;
 import foundry.veil.api.client.render.VeilRenderSystem;
 import foundry.veil.api.client.render.shader.program.ShaderProgram;
 import foundry.veil.api.client.render.shader.uniform.ShaderUniformAccess;
+import foundry.veil.api.event.VeilPostProcessingEvent;
+import foundry.veil.platform.VeilEventPlatform;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
@@ -47,6 +49,10 @@ public class WarpGateRenderer {
                 }
             }
         }
+    }
+
+    public static List<BlockPos> getGates() {
+        return gates;
     }
 
     private static final ResourceLocation WARPGATE_SHADER = ResourceLocation.fromNamespaceAndPath(CreateModernTech.MODID, "warpgate");
