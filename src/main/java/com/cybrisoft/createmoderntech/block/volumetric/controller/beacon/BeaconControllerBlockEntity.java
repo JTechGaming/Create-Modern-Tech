@@ -142,7 +142,7 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
         setChanged();
     }
 
-    private static VolumetricDisplayBlockEntity.BeaconData getNearestBeacon(VolumetricDisplayBlockEntity display) {
+    public static VolumetricDisplayBlockEntity.BeaconData getNearestBeacon(VolumetricDisplayBlockEntity display) {
         BlockPos rawPos = display.getBlockPos();
         SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(display.getLevel(), rawPos);
         Vec3 projectedPos;
@@ -174,7 +174,7 @@ public class BeaconControllerBlockEntity extends VolumetricControllerBlockEntity
     /**
      * Walks up the shaft to find the linked display block entity.
      */
-    private VolumetricDisplayBlockEntity getLinkedDisplay() {
+    public VolumetricDisplayBlockEntity getLinkedDisplay() {
         if (shaftPos == null || level == null) return null;
         if (level.getBlockEntity(shaftPos) instanceof VolumetricShaftBlockEntity shaft) {
             if (shaft.cachedDisplayPos != null &&

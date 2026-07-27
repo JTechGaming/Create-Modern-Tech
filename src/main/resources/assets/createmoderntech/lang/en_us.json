@@ -83,5 +83,37 @@
   "createmoderntech.ponder.beacon_controller.text_4": "However, if a beacon is hovered, powering the bottom of the beacon controller...",
   "createmoderntech.ponder.beacon_controller.text_5": "...will create a beacon compass",
   "createmoderntech.ponder.beacon_controller.text_6": "This compass can be extracted by something like a mechanical arm",
-  "createmoderntech.ponder.beacon_controller.text_7": "The compass will then point to the selected beacon"
+  "createmoderntech.ponder.beacon_controller.text_7": "The compass will then point to the selected beacon",
+
+  "createmoderntech.ponder.warp_gate_intro.header": "Displaying the Surrounding Terrain",
+  "createmoderntech.ponder.warp_gate_intro.text_1": "A warp gate starts with a warp drive which supplies the energy",
+  "createmoderntech.ponder.warp_gate_intro.text_2": "Then, a warp gate terminal forms the base of the warp gate",
+  "createmoderntech.ponder.warp_gate_intro.text_3": "The warp gate terminal can support a max gate radius of 10 blocks. If the radius of the gate is larger than that...",
+  "createmoderntech.ponder.warp_gate_intro.text_4": "Warp amplifiers can be added in between to extend the radius by 8 blocks each",
+  "createmoderntech.ponder.warp_gate_intro.text_5": "The maximum gate radius is 50 blocks (with 5 amplifiers), and the minimum radius is 8 blocks",
+  "createmoderntech.ponder.warp_gate_intro.text_6": "By placing a gate block directly above the terminal at the desired diameter and clicking the terminal with a wrench...",
+  "createmoderntech.ponder.warp_gate_intro.text_7": "It will show exactly where warp gate blocks need to be placed",
+  "createmoderntech.ponder.warp_gate_intro.text_8": "If the shape is fully built, powering the warp drive will activate the gate",
+
+  "createmoderntech.ponder.gate_working.header": "Using A Warp Gate",
+  "createmoderntech.ponder.gate_working.text_1": "Using the filter slots, a gate frequency can be set up.",
+  "createmoderntech.ponder.gate_working.text_2": "For a ship to travel through a gate, a transponder needs to be on board that is powered by rotational force",
+  "createmoderntech.ponder.gate_working.text_3": "If the ship travels fast enough...",
+  "createmoderntech.ponder.gate_working.text_4": "It will travel to the warp dimension",
+  "createmoderntech.ponder.gate_working.text_5": "It will stay there for a little while, until...",
+  "createmoderntech.ponder.gate_working.text_6": "...the ship comes out of the destination gate",
+
+  "createmoderntech.ponder.ai_system.header": "Setting Up An AI System",
+  "createmoderntech.ponder.ai_system.text_1": "The ai core is the center of an ai network",
+  "createmoderntech.ponder.ai_system.text_2": "Clicking the ai core block with an audio trigger or speaker item will link it to the network",
+  "createmoderntech.ponder.ai_system.text_3": "The ai network also works on simulated contraptions",
+
+  "createmoderntech.ponder.audio_trigger.header": "Using the Audio Trigger",
+  "createmoderntech.ponder.audio_trigger.text_1": "The audio trigger will transmit a message for the ai to read out",
+  "createmoderntech.ponder.audio_trigger.text_2": "Test Message",
+  "createmoderntech.ponder.audio_trigger.text_3": "When surrounded by certain blocks, the audio trigger can read information from them",
+  "createmoderntech.ponder.audio_trigger.text_4": "To read from a block, provide the direction like this: %N, %S etc.",
+  "createmoderntech.ponder.audio_trigger.text_5": "No Target",
+  "createmoderntech.ponder.audio_trigger.text_6": "96.0",
+  "createmoderntech.ponder.audio_trigger.text_7": "16 dirt and 7 iron ingot"
 }

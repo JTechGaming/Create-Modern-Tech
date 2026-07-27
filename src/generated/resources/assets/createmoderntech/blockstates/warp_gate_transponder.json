@@ -1,7 +1,19 @@
 {
   "variants": {
-    "": {
+    "facing=north": {
+      "model": "createmoderntech:block/warp_gate_transponder",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "createmoderntech:block/warp_gate_transponder",
+      "y": 270
+    },
+    "facing=south": {
       "model": "createmoderntech:block/warp_gate_transponder"
+    },
+    "facing=west": {
+      "model": "createmoderntech:block/warp_gate_transponder",
+      "y": 90
     }
   }
 }

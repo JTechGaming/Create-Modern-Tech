@@ -3,35 +3,35 @@
   "accept_mirrored": false,
   "category": "misc",
   "key": {
-    "C": {
-      "item": "create:cogwheel"
-    },
     "S": {
       "item": "create:shaft"
     },
     "P": {
       "item": "createmoderntech:high_frequency_plating"
     },
+    "Y": {
+      "item": "createmoderntech:ytterbium_ingot"
+    },
     "B": {
       "item": "create:railway_casing"
     },
+    "F": {
+      "item": "create:filter"
+    },
     "E": {
       "item": "create:electron_tube"
-    },
-    "T": {
-      "item": "create:transmitter"
     }
   },
   "pattern": [
-    "PBSBP",
-    "BETEB",
-    "PTCTP",
-    "BETEB",
+    "BYYYB",
+    "YEEEY",
+    "BYYYB",
+    " EFE ",
     "PBSBP"
   ],
   "result": {
     "count": 1,
-    "id": "createmoderntech:warp_gate_transponder"
+    "id": "createmoderntech:warp_gate_terminal"
   },
   "show_notification": false
 }

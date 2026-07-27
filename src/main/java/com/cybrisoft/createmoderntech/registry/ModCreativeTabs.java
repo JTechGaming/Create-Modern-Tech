@@ -77,8 +77,8 @@ public class ModCreativeTabs {
         pOutput.accept(ModBlocks.WHITE_COLOR_FILTER);
 
         pOutput.accept(ModBlocks.REGIONAL_STRESS_GAUGE_BLOCK);
-
-        pOutput.accept(ModBlocks.SPRING_BUFFER_BLOCK);
+//
+//        pOutput.accept(ModBlocks.SPRING_BUFFER_BLOCK);
 
         pOutput.accept(ModBlocks.SPEAKER_BLOCK);
         pOutput.accept(ModBlocks.AUDIO_TRIGGER_BLOCK);

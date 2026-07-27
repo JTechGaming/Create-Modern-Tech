@@ -91,6 +91,7 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
             b.putFloat("X", beacon.x);
             b.putFloat("Z", beacon.z);
             b.putInt("Color", beacon.color);
+            b.putString("Name", beacon.name);
             beaconList.add(b);
         }
         tag.put("Beacons", beaconList);
@@ -114,7 +115,7 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
         ListTag beaconList = tag.getList("Beacons", Tag.TAG_COMPOUND);
         for (int i = 0; i < beaconList.size(); i++) {
             CompoundTag b = beaconList.getCompound(i);
-            beacons.add(new BeaconData(b.getFloat("X"), b.getFloat("Z"), b.getInt("Color")));
+            beacons.add(new BeaconData(b.getFloat("X"), b.getFloat("Z"), b.getInt("Color"), b.getString("Name")));
         }
     }
 
@@ -144,12 +145,20 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
 
     public static class BeaconData {
         public final float x, z;
-        public final int color; // packed 0xRRGGBB
+        public int color; // packed 0xRRGGBB
+        public String name;
 
         public BeaconData(float x, float z, int color) {
             this.x = x;
             this.z = z;
             this.color = color;
+        }
+
+        public BeaconData(float x, float z, int color, String name) {
+            this.x = x;
+            this.z = z;
+            this.color = color;
+            this.name = name;
         }
 
         public float r() { return ((color >> 16) & 0xFF) / 255f; }

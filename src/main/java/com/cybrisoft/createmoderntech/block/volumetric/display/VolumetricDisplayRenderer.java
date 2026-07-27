@@ -18,15 +18,14 @@ import dev.ryanhcode.sable.companion.SableCompanion;
 import dev.ryanhcode.sable.companion.SubLevelAccess;
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderStateShard;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.renderer.*;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.FrontAndTop;
 import net.minecraft.core.Vec3i;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
@@ -488,6 +487,8 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
 
         drawCursor(ms.last().pose(), scanBuffer, scale, color, time, false, true);
 
+        List<BeaconLabel> labels = new ArrayList<>();
+
         for (VolumetricDisplayBlockEntity.BeaconData beacon : blockEntity.beacons) {
             float relX = beacon.x - sampleCenter.x();
             float relZ = beacon.z - sampleCenter.z();
@@ -502,6 +503,11 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
             ms.pushPose();
             ms.translate(relX * VOXEL_SIZE * scale, 0, relZ * VOXEL_SIZE * scale);
             drawCursor(ms.last().pose(), scanBuffer, scale, beaconColor, time, xOutOfRange || zOutOfRange, false);
+
+            if (beacon.name != null && !beacon.name.isBlank()) {
+                labels.add(new BeaconLabel(relX, relZ, beacon.name, beaconColor));
+            }
+
             ms.popPose();
         }
 
@@ -528,6 +534,50 @@ public class VolumetricDisplayRenderer extends SmartBlockEntityRenderer<Volumetr
         ms.translate(relX * VOXEL_SIZE * scale, 0, relZ * VOXEL_SIZE * scale);
         drawCursor(ms.last().pose(), scanBuffer, scale, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, time, xOutOfRange || zOutOfRange, true);
         ms.popPose();
+
+        for (BeaconLabel label : labels) {
+            ms.pushPose();
+
+            ms.translate(label.relX * VOXEL_SIZE * scale, 0, label.relZ * VOXEL_SIZE * scale);
+
+            // offset slightly above the cursor
+            ms.translate(0, 0.45f * scale + 0.02f, 0);
+
+            ms.mulPose(Axis.XP.rotationDegrees(-90));
+
+            ms.scale(0.5f, 0.5f, 0.5f);
+
+            // scale down to fit the display
+            float textScale = scale * 0.02f;
+            ms.scale(textScale, -textScale, textScale);
+
+            Font font = Minecraft.getInstance().font;
+            String name = label.name;
+            float textWidth = font.width(name);
+
+            int light = LightTexture.FULL_BRIGHT;
+
+            // center the text on the cursor
+            font.drawInBatch(name, -textWidth / 2f, 0,
+                    FastColor.ARGB32.color(255, (int)(label.color[0]*255), (int)(label.color[1]*255), (int)(label.color[2]*255)),
+                    false, ms.last().pose(), bufferSource, Font.DisplayMode.NORMAL, 0, light);
+
+            ms.popPose();
+        }
+    }
+
+    static class BeaconLabel {
+        public float relX;
+        public float relZ;
+        public String name;
+        public float[] color;
+
+        public BeaconLabel(float relX, float relZ, String name, float[] color) {
+            this.relX = relX;
+            this.relZ = relZ;
+            this.name = name;
+            this.color = color;
+        }
     }
 
     // -------------------------------------------------------------------------

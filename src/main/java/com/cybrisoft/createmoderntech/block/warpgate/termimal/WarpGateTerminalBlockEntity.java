@@ -21,6 +21,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.List;
 
@@ -70,22 +71,26 @@ public class WarpGateTerminalBlockEntity extends SmartBlockEntity {
 
     private boolean wasClient = false;
 
+    public Vec3 ponderRenderOffset = new Vec3(0, 0, 0);
+
     @Override
     public void initialize() {
         super.initialize();
+        if (isVirtual()) return;
         if (level == null) return;
         wasClient = level.isClientSide();
         if (!wasClient) {
             ServerWarpGateManager.register(level.dimension(), getBlockPos());
         } else {
-            WarpGateRenderer.register(getBlockPos());
+            WarpGateRenderer.register(this);
         }
     }
 
     @Override
     public void destroy() {
+        if (isVirtual()) return;
         if (wasClient) {
-            WarpGateRenderer.remove(getBlockPos());
+            WarpGateRenderer.remove(this);
         } else if (level != null) {
             ServerWarpGateManager.remove(level.dimension(), getBlockPos());
         }
@@ -112,24 +117,26 @@ public class WarpGateTerminalBlockEntity extends SmartBlockEntity {
     @Override
     public void tick() {
         super.tick();
-        if (level == null || level.isClientSide()) return;
+        if (level == null || (!isVirtual() && level.isClientSide())) return;
 
         boolean isOn =
                 multiblockRadius > 0 &&
                 isBeamOn &&
                 multiblockRadius <= 10 + amplifiers * 8;
 
+        float actualSpeed = speed < 0 ? -speed : speed;
+
         if (isOn) {
-            activationProgress = Math.min(1f, activationProgress + ACTIVATION_SPEED / multiblockRadius * (speed / 16f));
+            activationProgress = Math.min(1f, activationProgress + ACTIVATION_SPEED / multiblockRadius * (actualSpeed / 16f));
             cachedRadius = multiblockRadius;
             closing = 0f;
 
             if (!wasClosed && activationProgress == 1f) {
                 wasClosed = true;
-                level.playSound(null, worldPosition, ModSounds.PORTAL_CLOSE.get(), SoundSource.AMBIENT, 2.0f, 1.0f);
+                level.playSound(null, worldPosition, ModSounds.PORTAL_CLOSE.get(), SoundSource.AMBIENT, 4.0f, 1.0f);
             }
             if (!wasOn) {
-                level.playSound(null, worldPosition, ModSounds.PORTAL_ACTIVATE.get(), SoundSource.AMBIENT, 2.0f, 1.0f);
+                level.playSound(null, worldPosition, ModSounds.PORTAL_ACTIVATE.get(), SoundSource.AMBIENT, 4.0f, 1.0f);
             }
         } else {
             closing = 1f;

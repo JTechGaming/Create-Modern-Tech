@@ -21,6 +21,7 @@ import com.cybrisoft.createmoderntech.block.warpgate.drive.WarpDriveBlockEntity;
 import com.cybrisoft.createmoderntech.block.warpgate.termimal.WarpGateTerminalBlockEntity;
 import com.cybrisoft.createmoderntech.block.warpgate.termimal.WarpGateTerminalRenderer;
 import com.cybrisoft.createmoderntech.block.warpgate.transponder.WarpGateTransponderBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.transponder.WarpGateTransponderRenderer;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.OrientedRotatingVisual;
 import com.simibubi.create.content.kinetics.base.ShaftRenderer;
@@ -100,6 +101,7 @@ public class ModBlockEntityTypes {
     public static final BlockEntityEntry<WarpGateTransponderBlockEntity> WARP_GATE_TRANSPONDER = REGISTRATE
             .blockEntity("warp_gate_transponder", WarpGateTransponderBlockEntity::new)
             .visual(() -> ShaftVisual::new)
+            .renderer(() -> WarpGateTransponderRenderer::new)
             .validBlocks(ModBlocks.WARP_GATE_TRANSPONDER_BLOCK)
             .register();
 

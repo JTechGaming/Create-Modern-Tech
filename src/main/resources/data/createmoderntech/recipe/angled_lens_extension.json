@@ -6,7 +6,7 @@
     "S": { "item": "create:sturdy_sheet" }
   },
   "pattern": [
-    "L",
+    "L ",
     "SL"
   ],
   "result": { "id": "createmoderntech:angled_lens_extension" },

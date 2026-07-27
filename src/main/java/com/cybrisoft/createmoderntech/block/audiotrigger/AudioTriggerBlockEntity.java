@@ -113,7 +113,7 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
         return vars;
     }
 
-    private void trigger() {
+    public void trigger() {
         if (networkId == null || message.isBlank()) return;
 
         List<BlockPos> speakerPositions = new ArrayList<>();
@@ -135,14 +135,23 @@ public class AudioTriggerBlockEntity extends SmartBlockEntity {
 
         for (ServerPlayer player : serverLevel.players()) {
             boolean inRange = speakerPositions.stream().anyMatch(speakerPos -> {
-                    SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(level, speakerPos);
-                    Vec3 playerPos = player.position();
-                    if (subLevel != null) {
-                        Vector3dc shipPos = subLevel.logicalPose().position();
-                        playerPos.add(shipPos.x(), shipPos.y(), shipPos.z());
-                    }
-                    return playerPos.distanceTo(Vec3.atCenterOf(speakerPos)) <=
-                            ((SpeakerBlockEntity) serverLevel.getBlockEntity(speakerPos)).range;
+                Vec3 speakerGlobalPos;
+                SubLevelAccess subLevel = SableCompanion.INSTANCE.getContaining(level, speakerPos);
+                if (subLevel != null) {
+                    speakerGlobalPos = subLevel.logicalPose().transformPosition(Vec3.atCenterOf(speakerPos));
+                } else {
+                    speakerGlobalPos = Vec3.atCenterOf(speakerPos);
+                }
+
+                Vec3 playerPos = player.position();
+                double dist = SableCompanion.INSTANCE.distanceSquaredWithSubLevels(
+                        level,
+                        new Vector3d(playerPos.x, playerPos.y, playerPos.z),
+                        new Vector3d(speakerGlobalPos.x, speakerGlobalPos.y, speakerGlobalPos.z)
+                );
+
+                float range = ((SpeakerBlockEntity) serverLevel.getBlockEntity(speakerPos)).range;
+                return dist <= range * range;
             });
 
             if (inRange) {

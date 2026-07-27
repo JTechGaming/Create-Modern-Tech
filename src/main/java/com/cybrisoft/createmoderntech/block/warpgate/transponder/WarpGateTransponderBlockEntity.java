@@ -1,11 +1,15 @@
 package com.cybrisoft.createmoderntech.block.warpgate.transponder;
 
+import com.cybrisoft.createmoderntech.block.audiotrigger.AudioTriggerBlockEntity;
+import com.cybrisoft.createmoderntech.block.warpgate.termimal.WarpGateFilterSlot;
 import com.cybrisoft.createmoderntech.block.warpgate.termimal.WarpGateTerminalBlockEntity;
 import com.cybrisoft.createmoderntech.network.EndWarpTransitionPacket;
 import com.cybrisoft.createmoderntech.network.StartWarpTransitionPacket;
 import com.cybrisoft.createmoderntech.registry.ModSounds;
 import com.cybrisoft.createmoderntech.util.ServerWarpGateManager;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import dev.ryanhcode.sable.api.block.BlockEntitySubLevelActor;
 import dev.ryanhcode.sable.api.block.BlockSubLevelAssemblyListener;
 import dev.ryanhcode.sable.api.physics.handle.RigidBodyHandle;
@@ -14,12 +18,16 @@ import dev.ryanhcode.sable.companion.SubLevelAccess;
 import dev.ryanhcode.sable.companion.math.BoundingBox3dc;
 import dev.ryanhcode.sable.sublevel.ServerSubLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -34,6 +42,8 @@ import java.util.List;
 import java.util.Set;
 
 public class WarpGateTransponderBlockEntity extends KineticBlockEntity implements BlockEntitySubLevelActor, BlockSubLevelAssemblyListener {
+    public static final double MIN_SPEED_REQ = 0.5;
+
     public WarpGateTransponderBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
     }
@@ -50,11 +60,56 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
     private int warpTransitionTicks = 0;
     private List<Player> travelingPlayers = new ArrayList<>();
 
+    public FilteringBehaviour filtering;
+    public BlockPos oldTargetPos = null;
+    public BlockPos targetGatePos = null;
+    public float shipSpeed = 0f;
+    public float distanceToGate = 0f;
+    public float shipAcceleration = 0f;
+    private float lastShipSpeed = 0f;
+    private boolean mentionedSpeed = false;
+    private boolean mentionedGateOn = false;
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        filtering = new FilteringBehaviour(this, new WarpGateFilterSlot());
+        behaviours.add(filtering);
+        setLazyTickRate(10);
+    }
+
+    private boolean dataDirty = false;
+
     @Override
     public void tick() {
         super.tick();
 
         if (level == null || level.isClientSide()) return;
+
+        SubLevelAccess sublevel = SableCompanion.INSTANCE.getContaining(level, worldPosition);
+        if (sublevel != null) {
+            Vec3 velocity = new Vec3(
+                    sublevel.logicalPose().position().x() - sublevel.lastPose().position().x(),
+                    sublevel.logicalPose().position().y() - sublevel.lastPose().position().y(),
+                    sublevel.logicalPose().position().z() - sublevel.lastPose().position().z()
+            );
+            shipSpeed = (float) velocity.length();
+            shipAcceleration = shipSpeed - lastShipSpeed;
+            lastShipSpeed = shipSpeed;
+//            if (shipSpeed >= MIN_SPEED_REQ && !mentionedSpeed) {
+//                mentionedSpeed = true;
+//                triggerAudioTriggers();
+//            }
+
+            if (targetGatePos != null) {
+                BlockEntity ble = level.getBlockEntity(targetGatePos);
+                if (ble instanceof WarpGateTerminalBlockEntity gate) {
+                    Vec3 globalPos = sublevel.logicalPose().transformPosition(worldPosition.getCenter());
+                    Vec3 gateCenter = Vec3.atCenterOf(targetGatePos).add(0, gate.multiblockRadius, 0);
+                    distanceToGate = (float) globalPos.distanceTo(gateCenter);
+                }
+            }
+            dataDirty = true;
+        }
 
         if (warpTransitionTicks > 0) {
             warpTransitionTicks--;
@@ -82,7 +137,6 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
         Set<BlockPos> warpGates = ServerWarpGateManager.getWarpGates(level.dimension());
         if (warpGates.isEmpty()) return;
 
-        SubLevelAccess sublevel = SableCompanion.INSTANCE.getContaining(level, worldPosition);
         if (sublevel != null) {
             Vec3 projectionPos = sublevel.logicalPose().transformPosition(worldPosition.getCenter());
             for (BlockPos pos : warpGates) {
@@ -96,7 +150,7 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
                                 sublevel.logicalPose().position().y() - sublevel.lastPose().position().y(),
                                 sublevel.logicalPose().position().z() - sublevel.lastPose().position().z()
                         );
-                        if (velocity.length() < 0.5) continue; // minimum velocity threshold
+                        if (velocity.length() < MIN_SPEED_REQ) continue; // minimum velocity threshold
 
                         WarpGateTerminalBlockEntity pair = be.findPairedGate();
                         if (pair == null || !pair.wasOn) continue;
@@ -114,6 +168,7 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
                         warpTransitionTicks = 180;
                         stagingTeleport = true;
                         stagingPosition = be.getBlockPos().getCenter().add(0, 2000, 0);
+                        triggerAudioTriggers();
 
                         if (warpPosition != null) {
                             // send to all players on the sublevel
@@ -239,6 +294,84 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
             // reset relevant states
             warpPosition = null;
             travelingPlayers.clear();
+            targetGatePos = null;
+            mentionedSpeed = false;
+            mentionedGateOn = false;
+            shipSpeed = 0;
+            oldTargetPos = null;
+        }
+    }
+
+    private boolean wasPowered = false;
+
+    @Override
+    public void lazyTick() {
+        super.lazyTick();
+        if (level == null || level.isClientSide()) return;
+
+        if (dataDirty) {
+            sendData();
+            dataDirty = false;
+        }
+
+        ItemStack filter = filtering.getFilter();
+        if (filter.isEmpty()) {
+            targetGatePos = null;
+            return;
+        }
+
+        if (level == null) return;
+
+        if (!mentionedGateOn && targetGatePos != null && level.getBlockEntity(targetGatePos) instanceof WarpGateTerminalBlockEntity ble) {
+            if (ble.wasOn) {
+                mentionedGateOn = true;
+                triggerAudioTriggers();
+            }
+        }
+
+        boolean isPowered = level.hasNeighborSignal(worldPosition);
+        if (wasPowered) {
+            wasPowered = isPowered;
+            return;
+        }
+        wasPowered = isPowered;
+        if (!isPowered) return;
+
+        SubLevelAccess sublevel = SableCompanion.INSTANCE.getContaining(level, worldPosition);
+        if (sublevel == null) return;
+
+        Vec3 globalPos = sublevel.logicalPose().transformPosition(worldPosition.getCenter());
+
+        BlockPos closest = null;
+        double closestDist = Double.MAX_VALUE;
+
+        for (BlockPos pos : ServerWarpGateManager.getWarpGates(level.dimension())) {
+            BlockEntity ble = level.getBlockEntity(pos);
+            if (!(ble instanceof WarpGateTerminalBlockEntity gate)) continue;
+            if (!ItemStack.isSameItemSameComponents(gate.filtering.getFilter(), filter)) continue;
+
+            Vec3 gateCenter = Vec3.atCenterOf(pos).add(0, gate.multiblockRadius, 0);
+            double dist = globalPos.distanceToSqr(gateCenter);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closest = pos;
+            }
+        }
+
+        targetGatePos = closest;
+        triggerAudioTriggers();
+        sendData();
+    }
+
+    private void triggerAudioTriggers() {
+        if (readyToTeleport) return;
+        for (Direction dir : Direction.values()) {
+            BlockPos pos = getBlockPos().relative(dir);
+
+            if (level == null) return;
+            if (level.getBlockEntity(pos) instanceof AudioTriggerBlockEntity be) {
+                be.trigger();
+            }
         }
     }
 
@@ -253,6 +386,38 @@ public class WarpGateTransponderBlockEntity extends KineticBlockEntity implement
                 System.out.println("Player supposedly left sublevel");
                 level.getServer().execute(() -> player.teleportTo(safePos.x, safePos.y, safePos.z));
             }
+        }
+    }
+
+    @Override
+    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.write(compound, registries, clientPacket);
+        compound.putFloat("shipSpeed", shipSpeed);
+        compound.putFloat("shipAcceleration", shipAcceleration);
+        compound.putFloat("distanceToGate", distanceToGate);
+        compound.putBoolean("stagingTeleport", stagingTeleport);
+        if (targetGatePos != null) {
+            compound.putInt("targetGateX", targetGatePos.getX());
+            compound.putInt("targetGateY", targetGatePos.getY());
+            compound.putInt("targetGateZ", targetGatePos.getZ());
+        }
+    }
+
+    @Override
+    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
+        super.read(compound, registries, clientPacket);
+        shipSpeed = compound.getFloat("shipSpeed");
+        shipAcceleration = compound.getFloat("shipAcceleration");
+        distanceToGate = compound.getFloat("distanceToGate");
+        stagingTeleport = compound.getBoolean("stagingTeleport");
+        if (compound.contains("targetGateX")) {
+            targetGatePos = new BlockPos(
+                    compound.getInt("targetGateX"),
+                    compound.getInt("targetGateY"),
+                    compound.getInt("targetGateZ")
+            );
+        } else {
+            targetGatePos = null;
         }
     }
 }

@@ -1,10 +1,22 @@
 package com.cybrisoft.createmoderntech.block.volumetric.controller.beacon;
 
 import com.cybrisoft.createmoderntech.block.volumetric.controller.VolumetricControllerBlock;
+import com.cybrisoft.createmoderntech.block.volumetric.display.VolumetricDisplayBlockEntity;
 import com.cybrisoft.createmoderntech.registry.ModBlockEntityTypes;
+import com.simibubi.create.AllBlocks;
+import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
+import com.simibubi.create.content.redstone.nixieTube.NixieTubeBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -13,8 +25,11 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import com.simibubi.create.foundation.block.IBE;
+
+import java.util.List;
 
 public class BeaconControllerBlock extends VolumetricControllerBlock implements IBE<BeaconControllerBlockEntity>, IWrenchable {
     // set/clear beacon
@@ -71,6 +86,46 @@ public class BeaconControllerBlock extends VolumetricControllerBlock implements 
                 .setValue(FACING, context.getHorizontalDirection().getOpposite())
                 .setValue(POWERED_TOP, false)
                 .setValue(POWERED_BOTTOM, false);
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (player.isShiftKeyDown()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+        BeaconControllerBlockEntity be = getBlockEntity(level, pos);
+
+        if (be == null) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        if (stack.isEmpty()) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+        boolean nameItem = stack.getItem() == Items.NAME_TAG && stack.has(DataComponents.CUSTOM_NAME) || AllBlocks.CLIPBOARD.isIn(stack);
+        DyeColor dye = DyeColor.getColor(stack);
+
+        if (!nameItem && dye == null) return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+        Component component = stack.getOrDefault(DataComponents.CUSTOM_NAME, Component.empty());
+        if (AllBlocks.CLIPBOARD.isIn(stack)) {
+            List<ClipboardEntry> entries = ClipboardEntry.getLastViewedEntries(stack);
+            if (!entries.isEmpty())
+                component = entries.getFirst().text;
+        }
+
+        if (level.isClientSide) return ItemInteractionResult.SUCCESS;
+
+        VolumetricDisplayBlockEntity.BeaconData selected = BeaconControllerBlockEntity.getNearestBeacon(be.getLinkedDisplay());
+
+        if (selected == null) return ItemInteractionResult.SUCCESS;
+
+        String tagUsed = Component.Serializer.toJson(component, level.registryAccess());
+        if (nameItem) {
+            selected.name = tagUsed.replace("\"", "");
+        }
+        if (dye != null) {
+            selected.color = dye.getTextColor();
+        }
+        be.getLinkedDisplay().setChanged();
+        be.getLinkedDisplay().sendData();
+
+        return ItemInteractionResult.SUCCESS;
     }
 
     @Override
