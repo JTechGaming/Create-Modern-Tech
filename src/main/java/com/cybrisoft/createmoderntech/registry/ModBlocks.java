@@ -11,6 +11,7 @@ import com.cybrisoft.createmoderntech.block.lens.VerticalAngledLensExtensionBloc
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlock;
 import com.cybrisoft.createmoderntech.block.speaker.SpeakerBlockItem;
 import com.cybrisoft.createmoderntech.block.springbuffer.SpringBufferBlock;
+import com.cybrisoft.createmoderntech.block.starbreech.StarBreechBlock;
 import com.cybrisoft.createmoderntech.block.volumetric.controller.beacon.BeaconControllerBlock;
 import com.cybrisoft.createmoderntech.block.warpgate.amplifier.WarpAmplifierBlock;
 import com.cybrisoft.createmoderntech.block.warpgate.drive.WarpDriveBlock;
@@ -238,6 +239,19 @@ public class ModBlocks {
                     .transform(axeOrPickaxe())
                     .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
                     .transform(ModernTechStress.setImpact(8.0))
+                    .simpleItem()
+                    .register();
+
+    public static final BlockEntry<StarBreechBlock> STAR_BREECH_BLOCK =
+            REGISTRATE.setTooltipModifierFactory(item -> new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+                            .andThen(TooltipModifier.mapNull(KineticStats.create(item)))).block("star_breech", StarBreechBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(properties -> properties.isRedstoneConductor((pState, pLevel, pPos) -> false))
+                    .transform(BuilderTransformers.bearing("windmill", "gearbox"))
+                    .properties(p -> p.strength(0.8f))
+                    .transform(axeOrPickaxe())
+                    .blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.standardModel(c, p)))
+                    .transform(ModernTechStress.setImpact(1.0))
                     .simpleItem()
                     .register();
 

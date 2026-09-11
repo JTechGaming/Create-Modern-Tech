@@ -80,6 +80,8 @@ public class ModCreativeTabs {
 //
 //        pOutput.accept(ModBlocks.SPRING_BUFFER_BLOCK);
 
+        pOutput.accept(ModBlocks.STAR_BREECH_BLOCK);
+
         pOutput.accept(ModBlocks.SPEAKER_BLOCK);
         pOutput.accept(ModBlocks.AUDIO_TRIGGER_BLOCK);
         pOutput.accept(ModBlocks.AI_CORE_BLOCK);
