@@ -9,6 +9,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.handling.IPayloadContext;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ModPackets {
-
     public static void register(IEventBus modEventBus) {
         modEventBus.addListener(ModPackets::onRegisterPayloads);
     }
@@ -38,32 +38,39 @@ public class ModPackets {
                 ModPackets::handleUpdateAudioTrigger
         );
 
-        // Server -> Client
-        registrar.playToClient(
-                OpenAudioTriggerScreenPacket.TYPE,
-                OpenAudioTriggerScreenPacket.CODEC,
-                ClientPacketHandlers::handleOpenAudioTriggerScreen
-        );
-        registrar.playToClient(
-                PlaySpeakerPacket.TYPE,
-                PlaySpeakerPacket.CODEC,
-                ClientPacketHandlers::handlePlaySpeaker
-        );
-        registrar.playToClient(
-                HeightmapDataPacket.TYPE,
-                HeightmapDataPacket.CODEC,
-                ClientPacketHandlers::handleHeightmapData
-        );
-        registrar.playToClient(
-                StartWarpTransitionPacket.TYPE,
-                StartWarpTransitionPacket.CODEC,
-                ClientPacketHandlers::handleStart
-        );
-        registrar.playToClient(
-                EndWarpTransitionPacket.TYPE,
-                EndWarpTransitionPacket.CODEC,
-                ClientPacketHandlers::handleEnd
-        );
+        if (FMLEnvironment.dist.isDedicatedServer()) {
+            // Server -> Client
+            registrar.playToClient(
+                    OpenAudioTriggerScreenPacket.TYPE,
+                    OpenAudioTriggerScreenPacket.CODEC,
+                    (packet, payload) -> {
+                    }
+            );
+            registrar.playToClient(
+                    PlaySpeakerPacket.TYPE,
+                    PlaySpeakerPacket.CODEC,
+                    (packet, payload) -> {
+                    }
+            );
+            registrar.playToClient(
+                    HeightmapDataPacket.TYPE,
+                    HeightmapDataPacket.CODEC,
+                    (packet, payload) -> {
+                    }
+            );
+            registrar.playToClient(
+                    StartWarpTransitionPacket.TYPE,
+                    StartWarpTransitionPacket.CODEC,
+                    (packet, payload) -> {
+                    }
+            );
+            registrar.playToClient(
+                    EndWarpTransitionPacket.TYPE,
+                    EndWarpTransitionPacket.CODEC,
+                    (packet, payload) -> {
+                    }
+            );
+        }
     }
 
     private static void handleUpdateAudioTrigger(UpdateAudioTriggerPacket packet,

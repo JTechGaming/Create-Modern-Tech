@@ -91,7 +91,7 @@ public class VolumetricDisplayBlockEntity extends KineticBlockEntity {
             b.putFloat("X", beacon.x);
             b.putFloat("Z", beacon.z);
             b.putInt("Color", beacon.color);
-            b.putString("Name", beacon.name);
+            b.putString("Name", beacon.name != null ? beacon.name : "");
             beaconList.add(b);
         }
         tag.put("Beacons", beaconList);

@@ -79,6 +79,7 @@ public class CreateModernTech {
         });
 
         if (FMLEnvironment.dist.isClient()) {
+            ModClientPackets.register(modEventBus);
             modEventBus.addListener(CreateModernTech::registerKeyMappings);
             modEventBus.addListener(CreateModernTech::clientInit);
             modEventBus.addListener(BeaconCompassClientEvents::registerColors);
